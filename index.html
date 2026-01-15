@@ -2,160 +2,143 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>Game Top Up</title>
-
+<title>Customer Support</title>
 <style>
-body {
-    margin: 0;
-    font-family: Arial;
-    background: linear-gradient(180deg,#0b132b,#1c2541);
-    color: white;
+body{
+    margin:0;
+    font-family:Arial;
+    background:#0b132b;
+    color:white;
 }
-
-.container {
-    max-width: 400px;
-    margin: auto;
-    padding: 20px;
+.app{
+    display:flex;
+    height:100vh;
 }
-
-.login-box {
-    margin-top: 100px;
-    background: #1c2541;
-    padding: 25px;
-    border-radius: 15px;
-    text-align: center;
+.sidebar{
+    width:220px;
+    background:#1c2541;
+    padding:15px;
 }
-
-.login-box h2 {
-    margin-bottom: 20px;
+.sidebar button{
+    width:100%;
+    margin-top:10px;
+    padding:10px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
 }
-
-.google-btn {
-    background: white;
-    color: black;
-    padding: 12px;
-    border-radius: 30px;
-    cursor: pointer;
-    font-weight: bold;
+.main{
+    flex:1;
+    padding:20px;
 }
-
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+.hidden{display:none;}
+.chat{
+    background:#1c2541;
+    padding:15px;
+    border-radius:10px;
+    height:300px;
+    overflow:auto;
 }
-
-.cards {
-    display: grid;
-    grid-template-columns: repeat(2,1fr);
-    gap: 15px;
+input,select{
+    width:100%;
+    padding:8px;
+    margin-top:10px;
 }
-
-.card {
-    background: #1c2541;
-    padding: 15px;
-    border-radius: 15px;
-    text-align: center;
+.msg{
+    margin:5px 0;
 }
-
-.card img {
-    width: 60px;
-}
-
-.price {
-    color: #ffd166;
-    margin-top: 10px;
-}
-
-button.buy {
-    margin-top: 10px;
-    background: #ffd166;
-    border: none;
-    padding: 8px;
-    border-radius: 20px;
-    cursor: pointer;
-    width: 100%;
-}
-
-.hidden { display:none; }
+.client{color:#ffd166;}
+.support{color:#06d6a0;}
 </style>
 </head>
 
 <body>
 
-<div class="container">
-
-<!-- LOGIN -->
-<div class="login-box" id="login">
+<div id="login">
     <h2>تسجيل الدخول</h2>
-    <div class="google-btn" onclick="loginGoogle()">
-        🔐 الدخول باستخدام Gmail
-    </div>
+    <input id="name" placeholder="اسمك">
+    <button onclick="login()">دخول كعميل</button>
+    <hr>
+    <input id="supportCode" placeholder="كود فريق الدعم">
+    <button onclick="loginSupport()">دخول كدعم</button>
 </div>
 
-<!-- STORE -->
-<div id="store" class="hidden">
-    <div class="header">
-        <h3 id="welcome"></h3>
-        <span>💎 UC</span>
+<div class="app hidden" id="app">
+    <div class="sidebar">
+        <h3 id="userRole"></h3>
+        <button onclick="openComplaint()">🧾 فتح شكوى</button>
+        <button onclick="logout()">🚪 تسجيل خروج</button>
     </div>
 
-    <div class="cards">
-        <div class="card">
-            <img src="https://i.imgur.com/6XgqZ6R.png">
-            <div>60 UC</div>
-            <div class="price">EGP 41.99</div>
-            <button class="buy" onclick="buy()">شراء</button>
+    <div class="main">
+        <div id="complaintBox" class="hidden">
+            <select id="type">
+                <option>تأخير طلب</option>
+                <option>استفسار</option>
+                <option>مشكلة عامة</option>
+            </select>
+            <input id="text" placeholder="اكتب الشكوى">
+            <button onclick="send()">إرسال</button>
         </div>
 
-        <div class="card">
-            <img src="https://i.imgur.com/6XgqZ6R.png">
-            <div>300 UC</div>
-            <div class="price">EGP 209.99</div>
-            <button class="buy" onclick="buy()">شراء</button>
-        </div>
-
-        <div class="card">
-            <img src="https://i.imgur.com/6XgqZ6R.png">
-            <div>600 UC</div>
-            <div class="price">EGP 419.99</div>
-            <button class="buy" onclick="buy()">شراء</button>
-        </div>
-
-        <div class="card">
-            <img src="https://i.imgur.com/6XgqZ6R.png">
-            <div>1500 UC</div>
-            <div class="price">EGP 1049.99</div>
-            <button class="buy" onclick="buy()">شراء</button>
-        </div>
+        <div class="chat" id="chat"></div>
     </div>
-</div>
-
 </div>
 
 <script>
-function loginGoogle(){
-    let name = prompt("اكتب اسمك");
-    if(!name) return;
-    localStorage.setItem("user", name);
-    showStore();
+let user="",role="client";
+
+function login(){
+    user=document.getElementById("name").value;
+    if(!user)return;
+    role="client";
+    start();
 }
 
-function showStore(){
-    let user = localStorage.getItem("user");
-    if(user){
-        document.getElementById("login").classList.add("hidden");
-        document.getElementById("store").classList.remove("hidden");
-        document.getElementById("welcome").innerText = "👋 أهلاً يا " + user;
-    }
+function loginSupport(){
+    let code=document.getElementById("supportCode").value;
+    if(code==="SUPPORT123"){
+        user="الدعم";
+        role="support";
+        start();
+    }else alert("كود غلط");
 }
 
-function buy(){
-    alert("تم الطلب بنجاح (تجريبي)");
+function start(){
+    document.getElementById("login").classList.add("hidden");
+    document.getElementById("app").classList.remove("hidden");
+    document.getElementById("userRole").innerText= role==="support"?"🧑‍💼 دعم":"👤 عميل";
+    loadChat();
 }
 
-window.onload = showStore;
+function openComplaint(){
+    document.getElementById("complaintBox").classList.remove("hidden");
+}
+
+function send(){
+    let msg=document.getElementById("text").value;
+    if(!msg)return;
+    let chat=JSON.parse(localStorage.getItem("chat")||"[]");
+    chat.push({user,role,msg});
+    localStorage.setItem("chat",JSON.stringify(chat));
+    document.getElementById("text").value="";
+    loadChat();
+}
+
+function loadChat(){
+    let chat=JSON.parse(localStorage.getItem("chat")||"[]");
+    let box=document.getElementById("chat");
+    box.innerHTML="";
+    chat.forEach(c=>{
+        if(role==="support"||c.user===user){
+            box.innerHTML+=`<div class="msg ${c.role}">${c.user}: ${c.msg}</div>`;
+        }
+    });
+}
+
+function logout(){
+    location.reload();
+}
 </script>
 
 </body>
