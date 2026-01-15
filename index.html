@@ -7,11 +7,10 @@
 
 <style>
 *{box-sizing:border-box;font-family:Tahoma}
-
 body{
   margin:0;
   min-height:100vh;
-  background:linear-gradient(270deg,#000814,#001d3d,#003566,#000814);
+  background:linear-gradient(270deg,#000814,#001d3d,#000814);
   background-size:400% 400%;
   animation:bgMove 12s ease infinite;
   color:#fff;
@@ -23,23 +22,31 @@ body{
   100%{background-position:0% 50%}
 }
 
-.wrap{max-width:420px;margin:auto;padding:15px}
+.wrap{max-width:420px;margin:auto;padding:20px}
 
+/* صندوق */
 .box{
   background:rgba(0,0,0,.75);
   padding:25px;
   border-radius:18px;
-  box-shadow:0 0 25px rgba(0,80,255,.4);
 }
 
-h1{
+/* اسم الفندق */
+.logo{
   text-align:center;
-  margin:0 0 10px;
-  color:#4da3ff;
-  letter-spacing:2px;
+  font-size:32px;
+  font-weight:bold;
+  color:#ff0000;
+  animation:glow 2s infinite alternate;
+  margin-bottom:10px;
 }
 
-input,button,textarea{
+@keyframes glow{
+  from{text-shadow:0 0 5px #ff0000}
+  to{text-shadow:0 0 20px #ff3333}
+}
+
+input,button{
   width:100%;
   padding:14px;
   margin:6px 0;
@@ -48,8 +55,6 @@ input,button,textarea{
   font-size:15px;
 }
 
-input,textarea{background:#020d1f;color:#fff}
-
 button{
   background:#0066ff;
   color:#fff;
@@ -57,9 +62,13 @@ button{
   cursor:pointer;
 }
 
+button.secondary{
+  background:#333;
+}
+
 .nav{
   display:flex;
-  gap:5px;
+  gap:6px;
   margin-bottom:10px;
 }
 
@@ -69,7 +78,7 @@ button{
 .section.active{display:block}
 
 .item{
-  background:#020d1f;
+  background:#001d3d;
   padding:12px;
   border-radius:12px;
   margin:6px 0;
@@ -85,10 +94,21 @@ button{
 <div id="loginBox">
   <div class="wrap">
     <div class="box">
-      <h1>QUEEN HOTEL</h1>
-      <p class="small">اكتب اسمك فقط</p>
+      <div class="logo">QUEEN HOTEL</div>
+      <p class="small">اكتب اسمك للدخول</p>
+
       <input id="nameInput" placeholder="اسمك">
-      <button onclick="login()">دخول</button>
+
+      <button onclick="loginGuest()">دخول</button>
+
+      <hr style="opacity:.3">
+
+      <button class="secondary" onclick="toggleStaff()">موظف؟ اضغط هنا</button>
+
+      <div id="staffBox" style="display:none">
+        <input id="staffCode" placeholder="كود الموظف">
+        <button onclick="loginStaff()">دخول كموظف</button>
+      </div>
     </div>
   </div>
 </div>
@@ -98,9 +118,9 @@ button{
   <div class="wrap">
 
     <div class="nav">
-      <button onclick="openTab('rooms')">🏨</button>
-      <button onclick="openTab('cafe')">☕</button>
-      <button onclick="openTab('orders')">🧾</button>
+      <button onclick="showSection('rooms')">🏨</button>
+      <button onclick="showSection('cafe')">☕</button>
+      <button onclick="showSection('news')">📰</button>
       <button onclick="logout()">🚪</button>
     </div>
 
@@ -111,113 +131,87 @@ button{
 
     <div id="cafe" class="section">
       <h3>الكافيه</h3>
-      <div id="menuList"></div>
+      <div class="item small">⚠️ الطلبات متوقفة مؤقتًا</div>
     </div>
 
-    <div id="orders" class="section">
-      <h3>الطلبات المباشرة</h3>
-      <div id="ordersList"></div>
+    <div id="news" class="section">
+      <h3>الأخبار</h3>
+      <div class="item small">⚠️ قسم الأخبار غير مفعل حاليًا</div>
     </div>
 
   </div>
 </div>
 
-<!-- Firebase -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } 
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+<script>
+const STAFF_CODE = "QUEEN-STAFF";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBA2YeC6Mo8CZi7Ms5Gckhm4SWPmLgFNcE",
-  authDomain: "queenhotel-5703c.firebaseapp.com",
-  projectId: "queenhotel-5703c",
-  storageBucket: "queenhotel-5703c.firebasestorage.app",
-  messagingSenderId: "1024771547857",
-  appId: "1:1024771547857:web:8dd74f752bf0a4b6999bf0"
-};
+/* إظهار فورم الموظف */
+function toggleStaff(){
+  staffBox.style.display =
+    staffBox.style.display === "none" ? "block" : "none";
+}
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-const DRINKS = ["شاي","قهوة","بيبسي","مياه"];
-
-/* ===== LOGIN ===== */
-window.login = function(){
+/* دخول عميل */
+function loginGuest(){
   const name = nameInput.value.trim();
   if(!name){ alert("اكتب اسمك"); return; }
 
   localStorage.setItem("user", name);
-  loginBox.style.display="none";
-  appDiv.style.display="block";
-  loadUI();
+  localStorage.setItem("role", "guest");
+  startApp();
 }
 
-const appDiv = document.getElementById("app");
+/* دخول موظف */
+function loginStaff(){
+  const name = nameInput.value.trim();
+  const code = staffCode.value.trim();
 
-/* ===== UI ===== */
-function openTab(id){
-  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-}
-
-function loadUI(){
-  roomsList.innerHTML="";
-  for(let i=1;i<=12;i++){
-    roomsList.innerHTML += `<div class="item">غرفة ${i}</div>`;
-  }
-
-  menuList.innerHTML="";
-  DRINKS.forEach(d=>{
-    menuList.innerHTML += `
-      <div class="item">
-        ${d}
-        <button onclick="makeOrder('${d}')">طلب</button>
-      </div>`;
-  });
-}
-
-/* ===== ORDER ===== */
-window.makeOrder = async function(drink){
-  const user = localStorage.getItem("user");
-  let room = Number(prompt("رقم الغرفة 1 - 12"));
-
-  if(!room || room<1 || room>12){
-    alert("رقم غرفة غلط");
+  if(!name){ alert("اكتب اسمك"); return; }
+  if(code !== STAFF_CODE){
+    alert("كود الموظف غير صحيح");
     return;
   }
 
-  await addDoc(collection(db,"orders"),{
-    user, room, drink,
-    time: serverTimestamp()
-  });
-
-  alert("تم إرسال الطلب ✅");
+  localStorage.setItem("user", name);
+  localStorage.setItem("role", "staff");
+  startApp();
 }
 
-/* ===== LIVE ORDERS ===== */
-onSnapshot(collection(db,"orders"), snap=>{
-  ordersList.innerHTML="";
-  snap.forEach(doc=>{
-    const o = doc.data();
-    ordersList.innerHTML += `
-      <div class="item small">
-        ${o.user} | غرفة ${o.room} | ${o.drink}
-      </div>`;
-  });
-});
+/* بدء التطبيق */
+function startApp(){
+  loginBox.style.display="none";
+  app.style.display="block";
+  renderRooms();
+}
 
-/* ===== LOGOUT ===== */
-window.logout = function(){
+/* تنقل */
+function showSection(id){
+  document.querySelectorAll(".section")
+    .forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+/* غرف */
+function renderRooms(){
+  roomsList.innerHTML="";
+  for(let i=1;i<=12;i++){
+    roomsList.innerHTML +=
+      `<div class="item">غرفة رقم ${i}</div>`;
+  }
+}
+
+/* خروج */
+function logout(){
   localStorage.clear();
   location.reload();
 }
 
-if(localStorage.getItem("user")){
-  loginBox.style.display="none";
-  appDiv.style.display="block";
-  loadUI();
-}
+/* دخول تلقائي */
+window.onload = ()=>{
+  if(localStorage.getItem("user")){
+    startApp();
+  }
+};
 </script>
 
 </body>
