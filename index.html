@@ -18,21 +18,35 @@ body{
   justify-content:center;align-items:center;
 }
 .login-box{
-  width:380px;background:rgba(0,0,0,.75);
-  padding:30px;border-radius:20px;text-align:center;
+  width:380px;
+  background:rgba(0,0,0,.8);
+  padding:30px;border-radius:20px;
+  text-align:center;
 }
 .title{
-  font-size:38px;font-weight:900;
+  font-size:40px;font-weight:900;
   color:#ff0000;margin-bottom:10px;
 }
-.note{font-size:13px;color:#ff8080;margin-bottom:15px}
+.note{
+  font-size:13px;
+  color:#ff8080;
+  margin-bottom:15px;
+}
+
+/* inputs */
 input,button{
-  width:100%;padding:14px;margin:8px 0;
-  border:none;border-radius:12px;
+  width:100%;
+  padding:14px;
+  margin:8px 0;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
 }
 button{
-  background:#ff0000;color:#fff;
-  font-weight:bold;cursor:pointer;
+  background:#ff0000;
+  color:#fff;
+  font-weight:bold;
+  cursor:pointer;
 }
 
 /* APP */
@@ -56,17 +70,13 @@ button{
 .section{display:none}
 .section.active{display:block}
 
-/* ROOMS */
-.room{
-  background:#1f0000;padding:10px;
-  margin:6px 0;border-radius:10px;
-}
-
-/* CAFE */
+/* ITEMS */
 .item{
-  background:#1f0000;padding:10px;
-  margin:6px 0;border-radius:10px;
-  display:flex;justify-content:space-between;
+  background:#1f0000;
+  padding:10px;margin:6px 0;
+  border-radius:10px;
+  display:flex;
+  justify-content:space-between;
 }
 
 /* FOOTER */
@@ -83,10 +93,11 @@ button{
 <div id="login">
   <div class="login-box">
     <div class="title">QUEEN HOTEL</div>
-    <div class="note">🚫 هذا الدخول خاص بالمواطنين</div>
-    <input id="username" placeholder="اسمك">
-    <input id="role" placeholder="الدور (owner / staff / guest)">
+    <div class="note">🚫 ممنوع الكتابة هنا إلا الاسم فقط</div>
+    <input id="username" placeholder="اكتب اسمك">
+    <input id="secret" placeholder="الكود السري (للموظفين فقط)">
     <button onclick="login()">دخول</button>
+    <small>تطوير: إياد أبو جاد</small>
   </div>
 </div>
 
@@ -105,25 +116,21 @@ button{
 
 <div class="content">
 
-<!-- HOTEL -->
 <div id="hotel" class="section active">
   <h2>🏨 غرف الفندق (12 غرفة)</h2>
   <div id="rooms"></div>
 </div>
 
-<!-- CAFE -->
 <div id="cafe" class="section">
   <h2>☕ الكافيه</h2>
   <div id="menu"></div>
 </div>
 
-<!-- ORDERS -->
 <div id="orders" class="section">
-  <h2>🧾 طلبات الكافيه</h2>
+  <h2>🧾 الطلبات</h2>
   <div id="orderList"></div>
 </div>
 
-<!-- ADMIN -->
 <div id="admin" class="section">
   <h2>👑 إضافة مشروب</h2>
   <input id="drinkName" placeholder="اسم المشروب">
@@ -134,19 +141,32 @@ button{
 </div>
 </div>
 
-<div class="footer">© Queen Hotel – Eyad Abo Gad</div>
+<div class="footer">© Queen Hotel – Eyad أبو جاد</div>
 
 <script>
+/* 🔐 الأكواد السرية */
+const OWNER_CODE = "QUEEN-OWNER";
+const STAFF_CODE = "QUEEN-STAFF";
+
 let menu = JSON.parse(localStorage.menu||'["شاي","قهوة","بيبسي","مياه"]');
 let orders = JSON.parse(localStorage.orders||"[]");
 
 /* LOGIN */
 function login(){
-  let u=username.value.trim();
-  let r=role.value.trim();
-  if(!u||!r) return alert("اكتب الاسم والدور");
-  localStorage.user=u;
-  localStorage.role=r;
+  let u = username.value.trim();
+  let s = secret.value.trim();
+
+  if(!u){
+    alert("اكتب اسمك");
+    return;
+  }
+
+  let role = "guest";
+  if(s === OWNER_CODE) role = "owner";
+  else if(s === STAFF_CODE) role = "staff";
+
+  localStorage.user = u;
+  localStorage.role = role;
   start();
 }
 
@@ -156,7 +176,10 @@ function start(){
   app.style.display="block";
 
   if(localStorage.role==="staff") staffBtn.style.display="block";
-  if(localStorage.role==="owner"){ staffBtn.style.display="block"; ownerBtn.style.display="block"; }
+  if(localStorage.role==="owner"){
+    staffBtn.style.display="block";
+    ownerBtn.style.display="block";
+  }
 
   renderRooms();
   renderMenu();
@@ -167,12 +190,13 @@ function start(){
 function renderRooms(){
   rooms.innerHTML="";
   for(let i=1;i<=12;i++){
-    rooms.innerHTML+=`<div class="room">غرفة رقم ${i}</div>`;
+    rooms.innerHTML+=`<div class="item">غرفة رقم ${i}</div>`;
   }
 }
 
 /* MENU */
 function renderMenu(){
+  menuDiv = document.getElementById("menu");
   menuDiv.innerHTML="";
   menu.forEach(d=>{
     menuDiv.innerHTML+=`
@@ -183,23 +207,19 @@ function renderMenu(){
   });
 }
 
-/* ORDER WITH ROOM */
+/* ORDER */
 function order(item){
-  let room = prompt("يرجى اختيار رقم الغرفة (1 إلى 12)");
+  let room = prompt("اختر رقم الغرفة (1 إلى 12)");
   if(!room || isNaN(room) || room<1 || room>12){
     alert("رقم الغرفة غير صحيح");
     return;
   }
-  orders.push({
-    user:localStorage.user,
-    room:room,
-    item:item
-  });
+  orders.push({user:localStorage.user,room,item});
   localStorage.orders=JSON.stringify(orders);
-  alert("تم إرسال الطلب للغرفة رقم " + room);
+  alert("تم إرسال الطلب");
 }
 
-/* ORDERS VIEW */
+/* ORDERS */
 function renderOrders(){
   orderList.innerHTML="";
   orders.forEach(o=>{
@@ -212,7 +232,7 @@ function renderOrders(){
 
 /* ADMIN */
 function addDrink(){
-  let d=drinkName.value.trim();
+  let d = drinkName.value.trim();
   if(!d) return;
   menu.push(d);
   localStorage.menu=JSON.stringify(menu);
