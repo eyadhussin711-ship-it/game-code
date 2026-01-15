@@ -1,19 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>Queen Hotel</title>
+<title>فندق كوين</title>
 
 <style>
-*{box-sizing:border-box;font-family:'Segoe UI',Arial}
+*{box-sizing:border-box;font-family:'Segoe UI',Tahoma}
 body{
   margin:0;
   height:100vh;
-  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  background:linear-gradient(135deg,#000000,#1a0000,#000000);
   color:#fff;
 }
 
-/* ===== LOGIN ===== */
+/* ===== تسجيل الدخول ===== */
 #login{
   height:100vh;
   display:flex;
@@ -22,35 +22,28 @@ body{
 }
 .login-box{
   width:360px;
-  background:rgba(0,0,0,.4);
+  background:rgba(0,0,0,.7);
   padding:30px;
   border-radius:18px;
   text-align:center;
-  box-shadow:0 0 30px rgba(0,0,0,.6);
+  box-shadow:0 0 40px rgba(255,0,0,.25);
 }
 
-/* 🔥 Animated Title */
+/* 🔥 شعار متحرك */
 .title{
-  font-size:40px;
+  font-size:42px;
   font-weight:900;
-  letter-spacing:2px;
   margin-bottom:20px;
-  background:linear-gradient(
-    270deg,
-    #ffd700,
-    #ff9f1c,
-    #ffffff,
-    #ffd700
-  );
-  background-size:600% 600%;
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  animation:goldMove 4s ease infinite;
+  color:#ff0000;
+  text-shadow:
+    0 0 5px #ff0000,
+    0 0 15px #ff0000,
+    0 0 30px #8b0000;
+  animation:glow 2s ease-in-out infinite alternate;
 }
-@keyframes goldMove{
-  0%{background-position:0% 50%}
-  50%{background-position:100% 50%}
-  100%{background-position:0% 50%}
+@keyframes glow{
+  from{ text-shadow:0 0 5px #ff0000,0 0 15px #8b0000 }
+  to{ text-shadow:0 0 10px #ff0000,0 0 30px #ff0000 }
 }
 
 .login-box input,
@@ -66,16 +59,18 @@ body{
   background:#f1f5f9;
 }
 .login-box button{
-  background:#ffd700;
+  background:#ff0000;
+  color:#fff;
   font-weight:bold;
   cursor:pointer;
   transition:.2s;
 }
 .login-box button:hover{
+  background:#b30000;
   transform:scale(1.05);
 }
 
-/* ===== APP ===== */
+/* ===== التطبيق ===== */
 #app{
   display:none;
   height:100vh;
@@ -85,15 +80,17 @@ body{
   height:100%;
 }
 
-/* Sidebar */
+/* القائمة الجانبية */
 .sidebar{
   width:220px;
-  background:#0f172a;
+  background:#0a0000;
   padding:15px;
+  border-left:2px solid #ff0000;
 }
 .sidebar h3{
   text-align:center;
   margin-bottom:20px;
+  color:#ff0000;
 }
 .sidebar button{
   width:100%;
@@ -101,12 +98,16 @@ body{
   padding:12px;
   border:none;
   border-radius:10px;
-  background:#38bdf8;
+  background:#ff0000;
+  color:#fff;
   font-weight:bold;
   cursor:pointer;
 }
+.sidebar button:hover{
+  background:#b30000;
+}
 
-/* Content */
+/* المحتوى */
 .content{
   flex:1;
   padding:25px;
@@ -114,24 +115,25 @@ body{
 .section{display:none}
 .section.active{display:block}
 
-/* Chat */
+/* الشات */
 .chat-box{
-  background:#020617;
+  background:#000000;
   padding:12px;
   border-radius:12px;
   height:280px;
   overflow:auto;
   margin-bottom:10px;
+  border:1px solid #ff0000;
 }
 .msg{
   margin:6px 0;
 }
 
-/* Footer */
+/* الفوتر */
 .footer{
   position:fixed;
   bottom:8px;
-  right:12px;
+  left:12px;
   font-size:12px;
   opacity:.7;
 }
@@ -140,62 +142,62 @@ body{
 
 <body>
 
-<!-- LOGIN -->
+<!-- تسجيل الدخول -->
 <div id="login">
   <div class="login-box">
-    <div class="title">QUEEN HOTEL</div>
-    <input id="username" placeholder="Enter your name">
-    <button onclick="enter()">Enter</button>
-    <small>Developed by Eyad Abo Gad</small>
+    <div class="title">فندق كوين</div>
+    <input id="username" placeholder="اكتب اسمك">
+    <button onclick="enter()">دخول</button>
+    <small>تطوير: إياد أبو جاد</small>
   </div>
 </div>
 
-<!-- APP -->
+<!-- التطبيق -->
 <div id="app">
   <div class="app">
 
     <div class="sidebar">
-      <h3>Queen Hotel</h3>
-      <button onclick="openSec('hotel')">🏨 Hotel</button>
-      <button onclick="openSec('cafe')">☕ Cafe</button>
-      <button onclick="openSec('chat')">💬 Public Chat</button>
-      <button onclick="logout()">🚪 Logout</button>
+      <h3>فندق كوين</h3>
+      <button onclick="openSec('hotel')">🏨 الفندق</button>
+      <button onclick="openSec('cafe')">☕ الكافيه</button>
+      <button onclick="openSec('chat')">💬 الشات العام</button>
+      <button onclick="logout()">🚪 خروج</button>
     </div>
 
     <div class="content">
 
       <div id="hotel" class="section active">
-        <h2>🏨 Welcome to Queen Hotel</h2>
-        <p>Luxury rooms • 24/7 Service • Comfort & Style</p>
+        <h2>🏨 مرحبًا بكم في فندق كوين</h2>
+        <p>فخامة • راحة • خدمة 24 ساعة</p>
       </div>
 
       <div id="cafe" class="section">
-        <h2>☕ Queen Cafe</h2>
+        <h2>☕ كافيه كوين</h2>
         <ul>
-          <li>Coffee</li>
-          <li>Tea</li>
-          <li>Fresh Juice</li>
+          <li>قهوة</li>
+          <li>شاي</li>
+          <li>عصائر طازجة</li>
         </ul>
       </div>
 
       <div id="chat" class="section">
-        <h2>💬 Public Chat</h2>
+        <h2>💬 الشات العام</h2>
         <div class="chat-box" id="chatBox"></div>
-        <input id="msg" placeholder="Type a message">
-        <button onclick="sendMsg()">Send</button>
+        <input id="msg" placeholder="اكتب رسالة">
+        <button onclick="sendMsg()">إرسال</button>
       </div>
 
     </div>
   </div>
 </div>
 
-<div class="footer">© Queen Hotel – Eyad Abo Gad</div>
+<div class="footer">© فندق كوين – إياد أبو جاد</div>
 
 <script>
 function enter(){
   let u = username.value.trim();
   if(!u){
-    alert("Please enter your name");
+    alert("من فضلك اكتب اسمك");
     return;
   }
   localStorage.user = u;
