@@ -2,101 +2,160 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>Game Store</title>
+<title>Game Top Up</title>
 
 <style>
 body {
+    margin: 0;
     font-family: Arial;
-    background: #f2f2f2;
+    background: linear-gradient(180deg,#0b132b,#1c2541);
+    color: white;
+}
+
+.container {
+    max-width: 400px;
+    margin: auto;
+    padding: 20px;
+}
+
+.login-box {
+    margin-top: 100px;
+    background: #1c2541;
+    padding: 25px;
+    border-radius: 15px;
     text-align: center;
 }
-.box {
+
+.login-box h2 {
+    margin-bottom: 20px;
+}
+
+.google-btn {
     background: white;
-    padding: 20px;
-    width: 300px;
-    margin: 50px auto;
-    border-radius: 8px;
-}
-button {
-    padding: 10px;
-    width: 100%;
-    margin-top: 10px;
+    color: black;
+    padding: 12px;
+    border-radius: 30px;
     cursor: pointer;
+    font-weight: bold;
 }
-input {
-    width: 100%;
-    padding: 8px;
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    gap: 15px;
+}
+
+.card {
+    background: #1c2541;
+    padding: 15px;
+    border-radius: 15px;
+    text-align: center;
+}
+
+.card img {
+    width: 60px;
+}
+
+.price {
+    color: #ffd166;
     margin-top: 10px;
 }
-#store, #result {
-    display: none;
+
+button.buy {
+    margin-top: 10px;
+    background: #ffd166;
+    border: none;
+    padding: 8px;
+    border-radius: 20px;
+    cursor: pointer;
+    width: 100%;
 }
-.code {
-    color: green;
-    font-size: 18px;
-    margin-top: 15px;
-}
+
+.hidden { display:none; }
 </style>
 </head>
 
 <body>
 
-<div class="box" id="login">
-    <h2>تسجيل دخول</h2>
-    <input id="username" placeholder="اسم المستخدم">
-    <button onclick="login()">دخول</button>
+<div class="container">
+
+<!-- LOGIN -->
+<div class="login-box" id="login">
+    <h2>تسجيل الدخول</h2>
+    <div class="google-btn" onclick="loginGoogle()">
+        🔐 الدخول باستخدام Gmail
+    </div>
 </div>
 
-<div class="box" id="store">
-    <h2>🛒 متجر الأكواد</h2>
-    <p>منتج: Google Play Code</p>
-    <button onclick="buy()">شراء</button>
+<!-- STORE -->
+<div id="store" class="hidden">
+    <div class="header">
+        <h3 id="welcome"></h3>
+        <span>💎 UC</span>
+    </div>
+
+    <div class="cards">
+        <div class="card">
+            <img src="https://i.imgur.com/6XgqZ6R.png">
+            <div>60 UC</div>
+            <div class="price">EGP 41.99</div>
+            <button class="buy" onclick="buy()">شراء</button>
+        </div>
+
+        <div class="card">
+            <img src="https://i.imgur.com/6XgqZ6R.png">
+            <div>300 UC</div>
+            <div class="price">EGP 209.99</div>
+            <button class="buy" onclick="buy()">شراء</button>
+        </div>
+
+        <div class="card">
+            <img src="https://i.imgur.com/6XgqZ6R.png">
+            <div>600 UC</div>
+            <div class="price">EGP 419.99</div>
+            <button class="buy" onclick="buy()">شراء</button>
+        </div>
+
+        <div class="card">
+            <img src="https://i.imgur.com/6XgqZ6R.png">
+            <div>1500 UC</div>
+            <div class="price">EGP 1049.99</div>
+            <button class="buy" onclick="buy()">شراء</button>
+        </div>
+    </div>
 </div>
 
-<div class="box" id="result">
-    <h2>🎉 كودك</h2>
-    <div class="code" id="code"></div>
 </div>
 
 <script>
-function login() {
-    let user = document.getElementById("username").value;
-    if(user === "") return alert("اكتب اسمك");
-
-    localStorage.setItem("user", user);
-    document.getElementById("login").style.display = "none";
-    document.getElementById("store").style.display = "block";
+function loginGoogle(){
+    let name = prompt("اكتب اسمك");
+    if(!name) return;
+    localStorage.setItem("user", name);
+    showStore();
 }
 
-function buy() {
+function showStore(){
     let user = localStorage.getItem("user");
-    let used = localStorage.getItem("used_" + user);
-
-    if(used) {
-        alert("أنت أخذت كود قبل كده");
-        return;
-    }
-
-    let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    let code = "";
-    for(let i = 0; i < 16; i++) {
-        code += chars[Math.floor(Math.random() * chars.length)];
-    }
-
-    localStorage.setItem("used_" + user, code);
-
-    document.getElementById("store").style.display = "none";
-    document.getElementById("result").style.display = "block";
-    document.getElementById("code").innerText = code;
-}
-
-window.onload = function() {
-    let user = localStorage.getItem("user");
-    if(user) {
-        document.getElementById("login").style.display = "none";
-        document.getElementById("store").style.display = "block";
+    if(user){
+        document.getElementById("login").classList.add("hidden");
+        document.getElementById("store").classList.remove("hidden");
+        document.getElementById("welcome").innerText = "👋 أهلاً يا " + user;
     }
 }
+
+function buy(){
+    alert("تم الطلب بنجاح (تجريبي)");
+}
+
+window.onload = showStore;
 </script>
 
 </body>
