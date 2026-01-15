@@ -3,33 +3,38 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QUEEN HOTEL</title>
+<title>QUEEN</title>
 
 <style>
 *{box-sizing:border-box;font-family:Tahoma}
 
-/* فيديو الخلفية */
-#bgVideo{
-  position:fixed;
-  top:0;left:0;
-  width:100%;height:100%;
-  object-fit:cover;
-  z-index:-2;
+body{
+  margin:0;
+  min-height:100vh;
+  color:#fff;
+  background:#000;
 }
 
-/* طبقة تعتيم */
+/* فيديو الخلفية */
+#loginVideo{
+  position:fixed;
+  inset:0;
+  z-index:-2;
+  overflow:hidden;
+}
+#loginVideo iframe{
+  width:100%;
+  height:100%;
+  pointer-events:none;
+}
+
+/* تعتيم */
 body::before{
   content:"";
   position:fixed;
   inset:0;
   background:rgba(0,0,0,.6);
   z-index:-1;
-}
-
-body{
-  margin:0;
-  min-height:100vh;
-  color:#fff;
 }
 
 .wrap{max-width:420px;margin:auto;padding:15px}
@@ -43,7 +48,7 @@ body{
 /* لوجو */
 .logo{
   text-align:center;
-  font-size:30px;
+  font-size:32px;
   color:red;
   animation:glow 2s infinite alternate;
   margin-bottom:10px;
@@ -53,7 +58,7 @@ body{
   to{text-shadow:0 0 20px red}
 }
 
-input,button,textarea{
+input,button{
   width:100%;
   padding:13px;
   margin:6px 0;
@@ -61,14 +66,21 @@ input,button,textarea{
   border-radius:12px;
   font-size:14px;
 }
-input,textarea{background:#020d1f;color:#fff}
+
+input{background:#020d1f;color:#fff}
 
 button{
   background:#1e90ff;
   color:#fff;
   font-weight:bold;
   cursor:pointer;
+  transition:transform .15s ease, box-shadow .15s ease;
 }
+button:hover{
+  transform:scale(1.03);
+  box-shadow:0 0 12px rgba(30,144,255,.6);
+}
+button:active{transform:scale(.97)}
 
 .nav{
   display:flex;
@@ -87,9 +99,6 @@ button{
   margin:6px 0;
 }
 
-.small{font-size:12px;opacity:.8}
-
-/* فورم جانبي */
 .sideForm{
   background:#00162e;
   padding:15px;
@@ -97,7 +106,6 @@ button{
   margin-top:10px;
 }
 
-/* موبايل */
 @media(max-width:600px){
   .wrap{max-width:100%}
 }
@@ -106,10 +114,14 @@ button{
 
 <body>
 
-<!-- فيديو الخلفية -->
-<video autoplay muted loop playsinline id="bgVideo">
-  <source src="ain-sokhna.mp4" type="video/mp4">
-</video>
+<!-- فيديو صفحة الدخول -->
+<div id="loginVideo">
+  <iframe
+    src="https://www.youtube.com/embed/GBZkBvdN3wU?autoplay=1&mute=1&controls=0&loop=1&playlist=GBZkBvdN3wU"
+    frameborder="0"
+    allow="autoplay; encrypted-media">
+  </iframe>
+</div>
 
 <!-- LOGIN -->
 <div id="loginBox">
@@ -128,30 +140,17 @@ button{
   <div class="wrap">
 
     <div class="nav">
-      <button onclick="show('rooms')">🏨</button>
-      <button onclick="show('news')">📰</button>
-      <button id="ordersBtn" style="display:none" onclick="show('orders')">🧾</button>
+      <button onclick="showSection('rooms')">🏨</button>
+      <button onclick="showSection('orders')">🧾</button>
       <button onclick="logout()">🚪</button>
     </div>
 
-    <!-- ROOMS -->
     <div id="rooms" class="section active">
       <h3>الغرف</h3>
       <div id="roomsList"></div>
       <div id="roomForm"></div>
     </div>
 
-    <!-- NEWS -->
-    <div id="news" class="section">
-      <h3>الأخبار</h3>
-      <div id="newsList"></div>
-      <div id="newsForm" style="display:none">
-        <textarea id="newsText" placeholder="خبر جديد"></textarea>
-        <button onclick="addNews()">نشر</button>
-      </div>
-    </div>
-
-    <!-- ORDERS -->
     <div id="orders" class="section">
       <h3>الطلبات</h3>
       <div id="ordersList"></div>
@@ -160,15 +159,36 @@ button{
   </div>
 </div>
 
+<!-- أصوات -->
+<audio id="clickSound" src="click.mp3" preload="auto"></audio>
+<audio id="hoverSound" src="hover.mp3" preload="auto"></audio>
+
 <script>
-/* الأكواد */
+/* ===== الأصوات ===== */
+const clickSound=document.getElementById("clickSound");
+const hoverSound=document.getElementById("hoverSound");
+
+document.addEventListener("click",e=>{
+  if(e.target.tagName==="BUTTON"){
+    clickSound.currentTime=0;
+    clickSound.play().catch(()=>{});
+  }
+});
+
+document.addEventListener("mouseover",e=>{
+  if(e.target.tagName==="BUTTON"){
+    hoverSound.currentTime=0;
+    hoverSound.play().catch(()=>{});
+  }
+});
+
+/* ===== الصلاحيات ===== */
 const CODES={
   "QUEEN-HOTEL":"hotel",
-  "QUEEN-CAFE":"cafe",
   "QUEEN-OWNER":"owner"
 };
 
-/* تسجيل الدخول */
+/* ===== تسجيل الدخول ===== */
 function login(){
   const name=nameInput.value.trim();
   if(!name){alert("اكتب اسمك");return;}
@@ -180,30 +200,26 @@ function login(){
 
   localStorage.setItem("user",name);
   localStorage.setItem("role",role);
-  start();
+
+  startApp();
 }
 
-/* بدء التطبيق */
-function start(){
+/* ===== بدء التطبيق ===== */
+function startApp(){
+  loginVideo.style.display="none";
   loginBox.style.display="none";
   app.style.display="block";
-
-  if(localStorage.role!=="client"){
-    ordersBtn.style.display="block";
-  }
-  if(localStorage.role==="hotel"||localStorage.role==="owner"){
-    newsForm.style.display="block";
-  }
-  renderAll();
+  renderRooms();
+  renderOrders();
 }
 
-/* تنقل */
-function show(id){
+/* ===== تنقل ===== */
+function showSection(id){
   document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
 
-/* الغرف */
+/* ===== الغرف ===== */
 function renderRooms(){
   roomsList.innerHTML="";
   for(let i=1;i<=12;i++){
@@ -230,48 +246,31 @@ function openRoom(num){
   `;
 }
 
-/* إرسال الحجز */
+/* ===== الطلبات ===== */
 function sendBooking(room){
   if(!phone.value||!from.value||!to.value){
     alert("كمل البيانات");
     return;
   }
-
-  saveOrder(
-    "حجز غرفة",
-    "غرفة رقم "+room,
-    localStorage.user
-  );
-
-  alert("تم إرسال الحجز ✅");
-  roomForm.innerHTML="";
-}
-
-/* حفظ الطلب */
-function saveOrder(type,item,user){
   const arr=JSON.parse(localStorage.getItem("orders")||"[]");
   arr.push({
-    type,item,user,
+    room,
+    user:localStorage.user,
     time:new Date().toLocaleString()
   });
   localStorage.setItem("orders",JSON.stringify(arr));
+  alert("تم الإرسال");
+  roomForm.innerHTML="";
   renderOrders();
 }
 
-/* عرض الطلبات */
 function renderOrders(){
   ordersList.innerHTML="";
-  const role=localStorage.role;
   const arr=JSON.parse(localStorage.getItem("orders")||"[]");
-
   arr.forEach(o=>{
-    if(role==="hotel" && o.type!=="حجز غرفة") return;
-    if(role==="client") return;
-
     ordersList.innerHTML+=`
-      <div class="item small">
-        ${o.type}<br>
-        ${o.item}<br>
+      <div class="item">
+        غرفة ${o.room}<br>
         ${o.user}<br>
         ${o.time}
       </div>
@@ -279,43 +278,15 @@ function renderOrders(){
   });
 }
 
-/* الأخبار */
-function addNews(){
-  if(!newsText.value)return;
-  const n=JSON.parse(localStorage.getItem("news")||"[]");
-  n.unshift(newsText.value);
-  localStorage.setItem("news",JSON.stringify(n));
-  newsText.value="";
-  renderNews();
-}
-function renderNews(){
-  newsList.innerHTML="";
-  const n=JSON.parse(localStorage.getItem("news")||"[]");
-  n.forEach(x=>newsList.innerHTML+=`<div class="item">${x}</div>`);
-}
-
-/* رسم الكل */
-function renderAll(){
-  renderRooms();
-  renderOrders();
-  renderNews();
-}
-
-/* تحديث تلقائي */
-setInterval(()=>{
-  if(localStorage.role!=="client") renderOrders();
-  renderNews();
-},2000);
-
-/* خروج */
+/* ===== خروج ===== */
 function logout(){
   localStorage.clear();
   location.reload();
 }
 
 window.onload=()=>{
-  if(localStorage.user) start();
-}
+  if(localStorage.user) startApp();
+};
 </script>
 
 </body>
