@@ -2,7 +2,7 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>EYAD UC STORE</title>
+<title>EYAD STORE</title>
 
 <style>
 *{box-sizing:border-box;font-family:Arial}
@@ -39,9 +39,7 @@ body{
   width:100%;padding:12px;margin:8px 0;
   border:none;border-radius:10px;
 }
-.login-box button{
-  background:#00f5ff;font-weight:bold;cursor:pointer;
-}
+.login-box button{background:#00f5ff;font-weight:bold;cursor:pointer}
 
 /* APP */
 #app{display:none;height:100vh}
@@ -62,14 +60,12 @@ body{
 .section{display:none}
 .section.active{display:block}
 
-/* USERS */
-.user{
-  background:#0f2027;
+/* LIST */
+.item{
+  background:#1f3b4d;
   padding:10px;margin:6px 0;
   border-radius:10px;
-  display:flex;justify-content:space-between;
 }
-select{border-radius:6px}
 
 /* FOOTER */
 .footer{
@@ -84,7 +80,7 @@ select{border-radius:6px}
 <!-- LOGIN -->
 <div id="login">
   <div class="login-box">
-    <div class="title">EYAD UC STORE</div>
+    <div class="title">EYAD STORE</div>
     <input id="username" placeholder="اسمك">
     <input id="code" placeholder="كود الأونر (اختياري)">
     <button onclick="login()">دخول</button>
@@ -98,20 +94,34 @@ select{border-radius:6px}
 
 <div class="sidebar">
   <button onclick="openSec('store')">🛒 المتجر</button>
-  <button onclick="openSec('admin')" id="adminBtn" class="hidden">👑 الإدارة</button>
+  <button onclick="openSec('tickets')">🧾 الشكاوي</button>
+  <button id="adminBtn" class="hidden" onclick="openSec('admin')">👑 الإدارة</button>
   <button onclick="logout()">🚪 خروج</button>
 </div>
 
 <div class="content">
 
-<div id="store" class="section active">
+<!-- STORE -->
+<div id="store" class="section">
   <h2 id="welcome"></h2>
-  <p>أهلاً بك في المتجر</p>
+  <div id="products"></div>
 </div>
 
+<!-- TICKETS -->
+<div id="tickets" class="section">
+  <h3>📩 الشكاوي</h3>
+  <input id="ticketText" placeholder="اكتب الشكوى">
+  <button onclick="sendTicket()">إرسال</button>
+  <div id="ticketList"></div>
+</div>
+
+<!-- ADMIN -->
 <div id="admin" class="section">
   <h3>👥 المستخدمين</h3>
   <div id="usersList"></div>
+
+  <h3>📨 كل الشكاوي</h3>
+  <div id="allTickets"></div>
 </div>
 
 </div>
@@ -121,69 +131,86 @@ select{border-radius:6px}
 <div class="footer">© Eyad Abo Gad</div>
 
 <script>
-const OWNER_CODE = "OWNER-999";
+const OWNER_CODE="OWNER-999";
 
-/* SAFE GET USERS */
-function getUsers(){
-  return JSON.parse(localStorage.getItem("users") || "[]");
-}
-function saveUsers(arr){
-  localStorage.setItem("users", JSON.stringify(arr));
-}
+/* HELPERS */
+const get = k => JSON.parse(localStorage[k]||"[]");
+const set = (k,v) => localStorage[k]=JSON.stringify(v);
 
 /* LOGIN */
 function login(){
-  let u = username.value.trim();
+  let u=username.value.trim();
   if(!u) return alert("اكتب اسمك");
 
-  let role = (code.value === OWNER_CODE) ? "Owner" : "Player";
-  let users = getUsers();
+  let role = (code.value===OWNER_CODE || u==="Eyad")?"Owner":"Player";
 
-  let me = users.find(x => x.name === u);
-  if(!me){
-    users.push({name:u, role});
-    saveUsers(users);
+  let users=get("users");
+  if(!users.find(x=>x.name===u)){
+    users.push({name:u,role});
+    set("users",users);
   }
 
-  localStorage.user = u;
-  localStorage.role = role;
+  localStorage.user=u;
+  localStorage.role=role;
   start();
 }
 
-/* START APP */
+/* START */
 function start(){
-  document.getElementById("login").style.display="none";
-  document.getElementById("app").style.display="block";
-  welcome.innerText = "أهلاً " + localStorage.user;
+  login.style.display="none";
+  app.style.display="block";
+  welcome.innerText="أهلاً "+localStorage.user;
 
-  if(localStorage.role === "Owner"){
+  if(localStorage.role==="Owner"){
     adminBtn.classList.remove("hidden");
-    renderUsers();
   }
+
+  renderProducts();
+  renderTickets();
+  renderUsers();
   openSec("store");
 }
 
-/* USERS LIST */
-function renderUsers(){
-  let users = getUsers();
-  usersList.innerHTML = "";
-  users.forEach((u,i)=>{
-    usersList.innerHTML += `
-      <div class="user">
-        <span>${u.name}</span>
-        <select onchange="changeRole(${i},this.value)">
-          <option ${u.role==="Player"?"selected":""}>Player</option>
-          <option ${u.role==="Helper"?"selected":""}>Helper</option>
-          <option ${u.role==="Admin"?"selected":""}>Admin</option>
-        </select>
-      </div>
-    `;
+/* PRODUCTS */
+function renderProducts(){
+  products.innerHTML="";
+  get("products").forEach(p=>{
+    products.innerHTML+=`<div class="item">${p}</div>`;
   });
 }
-function changeRole(i,val){
-  let users = getUsers();
-  users[i].role = val;
-  saveUsers(users);
+
+/* TICKETS */
+function sendTicket(){
+  let t=ticketText.value.trim();
+  if(!t) return;
+  let arr=get("tickets");
+  arr.push({user:localStorage.user,text:t});
+  set("tickets",arr);
+  ticketText.value="";
+  renderTickets();
+}
+function renderTickets(){
+  ticketList.innerHTML="";
+  get("tickets").filter(t=>t.user===localStorage.user)
+    .forEach(t=>{
+      ticketList.innerHTML+=`<div class="item">${t.text}</div>`;
+    });
+
+  allTickets.innerHTML="";
+  if(localStorage.role==="Owner"){
+    get("tickets").forEach(t=>{
+      allTickets.innerHTML+=`<div class="item"><b>${t.user}:</b> ${t.text}</div>`;
+    });
+  }
+}
+
+/* USERS */
+function renderUsers(){
+  if(localStorage.role!=="Owner") return;
+  usersList.innerHTML="";
+  get("users").forEach(u=>{
+    usersList.innerHTML+=`<div class="item">${u.name} - ${u.role}</div>`;
+  });
 }
 
 /* NAV */
@@ -199,8 +226,8 @@ function logout(){
   location.reload();
 }
 
-/* AUTO LOGIN */
-window.onload = ()=>{
+/* AUTO */
+window.onload=()=>{
   if(localStorage.user && localStorage.role){
     start();
   }
