@@ -2,7 +2,7 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>EYAD STORE</title>
+<title>EYAD LOGIN</title>
 
 <style>
 body{
@@ -19,8 +19,11 @@ body{
   background:#102a36;
   padding:30px;
   border-radius:15px;
-  width:300px;
+  width:320px;
   text-align:center;
+}
+h2{
+  margin-bottom:20px;
 }
 input,button{
   width:100%;
@@ -34,37 +37,43 @@ button{
   font-weight:bold;
   cursor:pointer;
 }
-#app{display:none}
+#app{
+  display:none;
+}
 </style>
 </head>
 
 <body>
 
+<!-- LOGIN -->
 <div id="login" class="box">
   <h2>EYAD STORE</h2>
-  <input id="name" placeholder="اسمك">
-  <button onclick="enter()">دخول</button>
+  <input id="username" placeholder="اكتب اسمك">
+  <button onclick="login()">دخول</button>
 </div>
 
+<!-- APP -->
 <div id="app" class="box">
   <h2>أهلاً <span id="user"></span></h2>
-  <p>دخلت الموقع بنجاح ✅</p>
+  <p>تم تسجيل الدخول بنجاح ✅</p>
   <button onclick="logout()">خروج</button>
 </div>
 
 <script>
-function enter(){
-  let n = name.value.trim();
-  if(!n){ alert("اكتب اسمك"); return; }
-
-  localStorage.setItem("user", n);
-  show();
+function login(){
+  let name = document.getElementById("username").value.trim();
+  if(name === ""){
+    alert("اكتب اسمك");
+    return;
+  }
+  localStorage.setItem("user", name);
+  showApp();
 }
 
-function show(){
-  login.style.display="none";
-  app.style.display="block";
-  user.innerText = localStorage.getItem("user");
+function showApp(){
+  document.getElementById("login").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  document.getElementById("user").innerText = localStorage.getItem("user");
 }
 
 function logout(){
@@ -72,9 +81,9 @@ function logout(){
   location.reload();
 }
 
-window.onload = ()=>{
+window.onload = function(){
   if(localStorage.getItem("user")){
-    show();
+    showApp();
   }
 }
 </script>
