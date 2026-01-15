@@ -11,9 +11,8 @@ body{
   background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
   color:#fff;
 }
-.hidden{display:none}
 
-/* Login */
+/* ========== LOGIN ========== */
 #login{
   height:100vh;
   display:flex;
@@ -21,12 +20,13 @@ body{
   align-items:center;
 }
 .login-box{
-  width:340px;
+  width:330px;
   background:rgba(255,255,255,.15);
   padding:25px;
   border-radius:18px;
   text-align:center;
 }
+.login-box h2{margin-bottom:15px}
 .login-box input{
   width:100%;
   padding:12px;
@@ -40,16 +40,18 @@ body{
   border:none;
   border-radius:20px;
   background:#00f5ff;
+  color:#000;
   font-weight:bold;
   cursor:pointer;
 }
 
-/* App */
+/* ========== APP ========== */
+.hidden{display:none}
 #app{display:flex;height:100vh}
 
 /* Sidebar */
 .sidebar{
-  width:230px;
+  width:220px;
   background:rgba(0,0,0,.45);
   padding:15px;
 }
@@ -63,6 +65,7 @@ body{
   color:#fff;
   font-weight:bold;
   cursor:pointer;
+  transition:.3s;
 }
 .sidebar button.active{
   background:#00f5ff;
@@ -71,24 +74,32 @@ body{
 }
 
 /* Main */
-.main{flex:1;padding:20px;overflow:auto}
+.main{flex:1;padding:20px}
 .section{display:none}
 .section.active{display:block}
 
 /* Cards */
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:20px;
+}
 .card{
   background:rgba(255,255,255,.12);
-  padding:15px;
-  border-radius:12px;
-  margin:10px 0;
+  padding:20px;
+  border-radius:16px;
+  text-align:center;
 }
+.price{color:#ffd166}
 .buy{
+  margin-top:10px;
   padding:10px;
   width:100%;
   border:none;
   border-radius:20px;
   background:#ffd166;
   font-weight:bold;
+  cursor:pointer;
 }
 </style>
 </head>
@@ -96,15 +107,14 @@ body{
 <body>
 
 <!-- Sounds -->
-<audio id="clickSound" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
-<audio id="loginSound" src="https://assets.mixkit.co/active_storage/sfx/1120/1120-preview.mp3"></audio>
+<audio id="clickSound" src="https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3"></audio>
+<audio id="loginSound" src="https://assets.mixkit.co/sfx/preview/mixkit-confirmation-tone-2867.mp3"></audio>
 
 <!-- LOGIN -->
 <div id="login">
   <div class="login-box">
     <h2>تسجيل الدخول</h2>
-    <input id="user" placeholder="الاسم أو الإيميل">
-    <input id="code" placeholder="كود الأونر (اختياري)">
+    <input id="username" placeholder="اسمك">
     <button onclick="login()">دخول</button>
   </div>
 </div>
@@ -112,135 +122,90 @@ body{
 <!-- APP -->
 <div id="app" class="hidden">
   <div class="sidebar">
-    <button class="nav active" onclick="openSec('store',this)">🛒 المتجر</button>
-    <button class="nav" onclick="openSec('ticket',this)">🧾 الشكاوى</button>
-    <button class="nav ownerOnly hidden" onclick="openSec('users',this)">👥 الناس</button>
+    <button class="nav active" onclick="openSection('store',this)">🛒 المتجر</button>
+    <button class="nav" onclick="openSection('orders',this)">📦 مشترياتي</button>
     <button onclick="logout()">🚪 خروج</button>
   </div>
 
   <div class="main">
-    <h2>أهلاً <span id="username"></span> | <span id="role"></span></h2>
+    <h2>أهلاً <span id="userName"></span></h2>
 
     <!-- STORE -->
     <div id="store" class="section active">
-      <div class="card">60 UC <button class="buy">شراء</button></div>
-      <div class="card">300 UC <button class="buy">شراء</button></div>
-      <div class="card">600 UC <button class="buy">شراء</button></div>
+      <div class="cards">
+        <div class="card">
+          <h4>60 UC</h4>
+          <div class="price">EGP 41.99</div>
+          <button class="buy" onclick="buy()">شراء</button>
+        </div>
+        <div class="card">
+          <h4>300 UC</h4>
+          <div class="price">EGP 209.99</div>
+          <button class="buy" onclick="buy()">شراء</button>
+        </div>
+        <div class="card">
+          <h4>600 UC</h4>
+          <div class="price">EGP 419.99</div>
+          <button class="buy" onclick="buy()">شراء</button>
+        </div>
+      </div>
     </div>
 
-    <!-- TICKETS -->
-    <div id="ticket" class="section">
-      <input id="tmsg" placeholder="اكتب الشكوى">
-      <button onclick="sendTicket()">إرسال</button>
-      <div id="tickets"></div>
+    <!-- ORDERS -->
+    <div id="orders" class="section">
+      <p>لا توجد مشتريات حالياً</p>
     </div>
 
-    <!-- USERS -->
-    <div id="users" class="section">
-      <h3>إدارة الناس</h3>
-      <div id="userList"></div>
-    </div>
   </div>
 </div>
 
 <script>
-const OWNER_CODE="OWNER-999";
-
-function play(id){document.getElementById(id).play();}
+const clickSound = document.getElementById("clickSound");
+const loginSound = document.getElementById("loginSound");
 
 function login(){
-  play("loginSound");
-  let u=user.value.trim();
-  let c=code.value.trim();
-  if(!u)return alert("اكتب الاسم");
-
-  let role="Player";
-  if(c){
-    if(c!==OWNER_CODE)return alert("كود الأونر غلط");
-    role="Owner";
-  }
-
-  let users=JSON.parse(localStorage.users||"[]");
-  if(!users.find(x=>x.name===u)){
-    users.push({name:u,role:role,banned:false});
-    localStorage.users=JSON.stringify(users);
-  }
-
-  localStorage.user=u;
-  localStorage.role=role;
-  start();
-}
-
-function start(){
-  let users=JSON.parse(localStorage.users||"[]");
-  let me=users.find(x=>x.name===localStorage.user);
-  if(me && me.banned){
-    alert("أنت محظور");
-    localStorage.clear();
+  let user = document.getElementById("username").value.trim();
+  if(user === ""){
+    alert("اكتب اسمك");
     return;
   }
+  loginSound.play();
+  localStorage.setItem("user",user);
 
-  login.style.display="none";
-  app.classList.remove("hidden");
-  username.innerText=localStorage.user;
-  role.innerText=localStorage.role;
-
-  if(localStorage.role==="Owner")
-    document.querySelector(".ownerOnly").classList.remove("hidden");
-
-  renderUsers();
+  document.getElementById("login").style.display="none";
+  document.getElementById("app").classList.remove("hidden");
+  document.getElementById("userName").innerText=user;
 }
 
-function logout(){localStorage.clear();location.reload();}
+function logout(){
+  localStorage.clear();
+  location.reload();
+}
 
-function openSec(id,btn){
-  play("clickSound");
+function openSection(id,btn){
+  clickSound.play();
+
   document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
+
   document.querySelectorAll(".nav").forEach(b=>b.classList.remove("active"));
   btn.classList.add("active");
 }
 
-function sendTicket(){
-  let arr=JSON.parse(localStorage.tickets||"[]");
-  arr.push({user:localStorage.user,msg:tmsg.value});
-  localStorage.tickets=JSON.stringify(arr);
-  alert("تم إرسال الشكوى");
+function buy(){
+  clickSound.play();
+  alert("تم اختيار المنتج (تجريبي)");
 }
 
-function renderUsers(){
-  if(localStorage.role!=="Owner")return;
-  let box=userList;
-  box.innerHTML="";
-  let users=JSON.parse(localStorage.users||"[]");
-  users.forEach(u=>{
-    box.innerHTML+=`
-      <div class="card">
-        ${u.name} | ${u.role}
-        <br>
-        <button onclick="setRole('${u.name}','Helper')">توظيف</button>
-        <button onclick="setRole('${u.name}','Admin')">ترقية</button>
-        <button onclick="setRole('${u.name}','Player')">فصل</button>
-        <button onclick="ban('${u.name}')">حظر</button>
-      </div>`;
-  });
+// دخول تلقائي
+window.onload = function(){
+  let user = localStorage.getItem("user");
+  if(user){
+    document.getElementById("login").style.display="none";
+    document.getElementById("app").classList.remove("hidden");
+    document.getElementById("userName").innerText=user;
+  }
 }
-
-function setRole(name,role){
-  let users=JSON.parse(localStorage.users);
-  users.forEach(u=>{if(u.name===name)u.role=role});
-  localStorage.users=JSON.stringify(users);
-  renderUsers();
-}
-
-function ban(name){
-  let users=JSON.parse(localStorage.users);
-  users.forEach(u=>{if(u.name===name)u.banned=true});
-  localStorage.users=JSON.stringify(users);
-  renderUsers();
-}
-
-window.onload=()=>localStorage.user&&start();
 </script>
 
 </body>
