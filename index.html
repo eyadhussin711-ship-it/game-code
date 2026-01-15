@@ -3,71 +3,81 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Queen Hotel</title>
+<title>Queen App</title>
 
 <style>
 *{box-sizing:border-box;font-family:Tahoma}
+
 body{
   margin:0;
   min-height:100vh;
   color:#fff;
-  background:
-    linear-gradient(rgba(0,0,0,.75),rgba(0,0,0,.85)),
-    url("https://i.imgur.com/DE0F3961.jpg");
-  background-size:cover;
-  background-position:center;
-  animation:bgMove 25s infinite alternate;
+  background:linear-gradient(270deg,#000,#001a66,#000,#660000);
+  background-size:600% 600%;
+  animation:bgMove 15s infinite;
 }
 @keyframes bgMove{
-  from{background-position:center top}
-  to{background-position:center bottom}
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
 }
+
 .wrap{max-width:430px;margin:auto;padding:15px}
 .box{
-  background:rgba(0,0,40,.75);
+  background:rgba(0,0,0,.75);
   padding:20px;
-  border-radius:18px;
-  box-shadow:0 0 30px #000;
+  border-radius:20px;
+  box-shadow:0 0 25px #000;
 }
+
 h1{
   text-align:center;
-  color:#ff0000;
-  margin-bottom:10px;
+  color:red;
   animation:glow 2s infinite alternate;
 }
 @keyframes glow{
   from{text-shadow:0 0 5px red}
   to{text-shadow:0 0 25px red}
 }
-input,button,textarea,select{
+
+input,select,textarea,button{
   width:100%;
   padding:12px;
   margin:6px 0;
   border:none;
   border-radius:12px;
 }
+
 button{
-  background:#0a66ff;
+  background:#005bff;
   color:#fff;
   font-weight:bold;
   cursor:pointer;
 }
+
 .nav{
   display:flex;
   gap:5px;
   margin-bottom:10px;
 }
 .nav button{flex:1;font-size:13px}
+
 .section{display:none}
 .section.active{display:block}
+
 .item{
-  background:#0a0f2a;
+  background:#0b133a;
   padding:12px;
   border-radius:12px;
-  margin:6px 0;
+  margin:8px 0;
 }
+
+img,video{
+  width:100%;
+  border-radius:12px;
+}
+
 .small{font-size:12px;opacity:.8}
-img{max-width:100%;border-radius:12px}
 </style>
 </head>
 
@@ -98,9 +108,9 @@ img{max-width:100%;border-radius:12px}
     <div class="nav">
       <button onclick="show('rooms')">🏨</button>
       <button onclick="show('cafe')">☕</button>
-      <button onclick="show('news')">📰</button>
       <button onclick="show('events')">🎉</button>
-      <button id="ordersBtn" onclick="show('orders')" style="display:none">📩</button>
+      <button onclick="show('news')">📰</button>
+      <button onclick="show('orders')" id="ordersBtn" style="display:none">📩</button>
       <button onclick="logout()">🚪</button>
     </div>
 
@@ -116,21 +126,24 @@ img{max-width:100%;border-radius:12px}
       <div id="menuList"></div>
     </div>
 
-    <!-- NEWS -->
-    <div id="news" class="section">
-      <h3>الأخبار</h3>
-      <div id="newsList"></div>
-      <textarea id="newsText" placeholder="خبر جديد (للأونر فقط)"></textarea>
-      <button onclick="addNews()">نشر</button>
-    </div>
-
     <!-- EVENTS -->
     <div id="events" class="section">
       <h3>الحفلات</h3>
-      <div class="item">
-        <img src="https://i.imgur.com/DE0F3961.jpg">
-        <p class="small">حفلات Queen Plaza – العين السخنة</p>
+
+      <div id="eventForm" style="display:none">
+        <input type="file" id="eventFile" accept="image/*,video/*">
+        <button onclick="addEvent()">نشر</button>
       </div>
+
+      <div id="eventsList"></div>
+    </div>
+
+    <!-- NEWS -->
+    <div id="news" class="section">
+      <h3>الأخبار</h3>
+      <textarea id="newsText" placeholder="خبر جديد"></textarea>
+      <button onclick="addNews()">نشر</button>
+      <div id="newsList"></div>
     </div>
 
     <!-- ORDERS -->
@@ -155,9 +168,9 @@ function login(){
 
   if(!name)return alert("اكتب اسمك");
 
-  if(role==="owner" && code!==OWNER_CODE)return alert("كود أونر غلط");
+  if(role==="owner" && code!==OWNER_CODE)return alert("كود الأونر غلط");
   if(role==="hotel" && code!==HOTEL_CODE)return alert("كود الفندق غلط");
-  if(role==="cafe"  && code!==CAFE_CODE)return alert("كود الكافيه غلط");
+  if(role==="cafe" && code!==CAFE_CODE)return alert("كود الكافيه غلط");
 
   localStorage.user=name;
   localStorage.role=role;
@@ -167,7 +180,14 @@ function login(){
 function start(){
   loginBox.style.display="none";
   app.style.display="block";
-  if(localStorage.role!=="client") ordersBtn.style.display="block";
+
+  if(localStorage.role!=="client"){
+    ordersBtn.style.display="block";
+  }
+  if(localStorage.role==="owner"){
+    eventForm.style.display="block";
+  }
+
   renderAll();
 }
 
@@ -200,12 +220,7 @@ function renderCafe(){
 
 function sendOrder(type,val){
   const orders=JSON.parse(localStorage.orders||"[]");
-  orders.push({
-    user:localStorage.user,
-    role:localStorage.role,
-    type,val,
-    time:new Date().toLocaleTimeString()
-  });
+  orders.push({user:localStorage.user,type,val,time:new Date().toLocaleTimeString()});
   localStorage.orders=JSON.stringify(orders);
   alert("تم الإرسال ✔");
 }
@@ -238,16 +253,44 @@ function renderNews(){
   });
 }
 
+function addEvent(){
+  const file=eventFile.files[0];
+  if(!file)return;
+
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const events=JSON.parse(localStorage.events||"[]");
+    events.unshift({type:file.type,data:e.target.result});
+    localStorage.events=JSON.stringify(events);
+    renderEvents();
+  };
+  reader.readAsDataURL(file);
+}
+
+function renderEvents(){
+  eventsList.innerHTML="";
+  const events=JSON.parse(localStorage.events||"[]");
+  events.forEach(ev=>{
+    if(ev.type.startsWith("image")){
+      eventsList.innerHTML+=`<div class="item"><img src="${ev.data}"></div>`;
+    }else{
+      eventsList.innerHTML+=`<div class="item"><video src="${ev.data}" controls></video></div>`;
+    }
+  });
+}
+
 function renderAll(){
   renderRooms();
   renderCafe();
   renderOrders();
   renderNews();
+  renderEvents();
 }
 
 setInterval(()=>{
   if(localStorage.role!=="client")renderOrders();
   renderNews();
+  renderEvents();
 },1000);
 
 function logout(){
