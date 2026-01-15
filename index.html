@@ -2,7 +2,7 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>UC Store</title>
+<title>UC Store System</title>
 
 <style>
 *{box-sizing:border-box;font-family:Arial}
@@ -11,8 +11,9 @@ body{
   background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
   color:#fff;
 }
+.hidden{display:none}
 
-/* ===== Login ===== */
+/* Login */
 #login{
   height:100vh;
   display:flex;
@@ -26,7 +27,6 @@ body{
   border-radius:18px;
   text-align:center;
 }
-.login-box h2{margin-bottom:20px}
 .login-box input{
   width:100%;
   padding:12px;
@@ -37,89 +37,65 @@ body{
 .login-box button{
   width:100%;
   padding:12px;
-  margin-top:10px;
   border:none;
   border-radius:20px;
   background:#00f5ff;
-  color:#000;
   font-weight:bold;
-  cursor:pointer;
 }
 
-/* ===== App ===== */
-.hidden{display:none}
-
-#app{
-  display:flex;
-  height:100vh;
-}
+/* App */
+#app{display:flex;height:100vh}
 
 /* Sidebar */
 .sidebar{
-  width:220px;
+  width:230px;
   background:rgba(0,0,0,.45);
   padding:15px;
 }
-.sidebar h3{
-  text-align:center;
-  color:#00f5ff;
-}
 .sidebar button{
   width:100%;
-  padding:11px;
-  margin:7px 0;
+  padding:12px;
+  margin:8px 0;
   border:none;
-  border-radius:12px;
-  background:#00f5ff;
-  color:#000;
+  border-radius:14px;
+  background:rgba(255,255,255,.15);
+  color:#fff;
   font-weight:bold;
   cursor:pointer;
-  transition:.3s;
 }
-.sidebar button:hover{
-  transform:scale(1.05);
+.sidebar button.active{
+  background:#00f5ff;
+  color:#000;
+  box-shadow:0 0 12px #00f5ff;
 }
 
 /* Main */
-.main{
-  flex:1;
-  padding:20px;
-  overflow:auto;
-}
-.section{
-  display:none;
-}
-.section.active{
-  display:block;
-}
+.main{flex:1;padding:20px;overflow:auto}
+.section{display:none}
+.section.active{display:block}
 
 /* Cards */
-.cards{
-  margin-top:20px;
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-  gap:20px;
-}
 .card{
   background:rgba(255,255,255,.1);
-  padding:20px;
-  border-radius:16px;
-  text-align:center;
-}
-.card h4{margin:10px 0}
-.price{color:#ffd166}
-.buy{
-  margin-top:10px;
-  padding:10px;
-  width:100%;
-  border:none;
-  border-radius:20px;
-  background:#ffd166;
-  font-weight:bold;
+  padding:15px;
+  border-radius:12px;
+  margin:10px 0;
   cursor:pointer;
 }
-.buy:hover{
-  box-shadow:0 0 15px #ffd166;
+
+/* Owner panel */
+.user-card{
+  background:rgba(255,255,255,.12);
+  padding:10px;
+  border-radius:10px;
+  margin:8px 0;
+}
+.actions button{
+  margin:4px;
+  padding:6px 10px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
 }
 </style>
 </head>
@@ -130,8 +106,8 @@ body{
 <div id="login">
   <div class="login-box">
     <h2>تسجيل الدخول</h2>
-    <input id="username" placeholder="الاسم أو الإيميل">
-    <input id="code" placeholder="كود الدخول">
+    <input id="user" placeholder="الاسم أو الإيميل">
+    <input id="code" placeholder="كود الأونر (لو موجود)">
     <button onclick="login()">دخول</button>
   </div>
 </div>
@@ -139,98 +115,127 @@ body{
 <!-- APP -->
 <div id="app" class="hidden">
   <div class="sidebar">
-    <h3>UC STORE</h3>
-    <button onclick="showSection('store')">🛒 المتجر</button>
-    <button onclick="showSection('orders')">📦 مشترياتي</button>
-    <button onclick="showSection('support')">🧾 الدعم</button>
+    <button class="nav active" onclick="openSec('store',this)">🛒 المتجر</button>
+    <button class="nav" onclick="openSec('ticket',this)">🧾 الشكاوى</button>
+    <button class="nav ownerOnly hidden" onclick="openSec('users',this)">👥 الناس</button>
     <button onclick="logout()">🚪 خروج</button>
   </div>
 
   <div class="main">
-    <h2>أهلاً <span id="userName"></span></h2>
+    <h2>أهلاً <span id="username"></span> | <span id="role"></span></h2>
 
     <!-- STORE -->
     <div id="store" class="section active">
-      <div class="cards">
-        <div class="card">
-          <h4>60 UC</h4>
-          <div class="price">EGP 41.99</div>
-          <button class="buy" onclick="buy('60 UC')">شراء</button>
-        </div>
-
-        <div class="card">
-          <h4>300 UC</h4>
-          <div class="price">EGP 209.99</div>
-          <button class="buy" onclick="buy('300 UC')">شراء</button>
-        </div>
-
-        <div class="card">
-          <h4>600 UC</h4>
-          <div class="price">EGP 419.99</div>
-          <button class="buy" onclick="buy('600 UC')">شراء</button>
-        </div>
-      </div>
+      <div class="card">60 UC</div>
+      <div class="card">300 UC</div>
+      <div class="card">600 UC</div>
     </div>
 
-    <!-- ORDERS -->
-    <div id="orders" class="section">
-      <h3>مشترياتي</h3>
-      <p>لا توجد مشتريات حالياً</p>
+    <!-- TICKETS -->
+    <div id="ticket" class="section">
+      <h3>فتح شكوى</h3>
+      <input id="tmsg" placeholder="اكتب مشكلتك">
+      <button onclick="sendTicket()">إرسال</button>
+      <div id="tickets"></div>
     </div>
 
-    <!-- SUPPORT -->
-    <div id="support" class="section">
-      <h3>الدعم</h3>
-      <p>اكتب مشكلتك وسيتم الرد عليك</p>
-      <input placeholder="اكتب رسالتك">
-      <button class="buy">إرسال</button>
+    <!-- USERS (OWNER ONLY) -->
+    <div id="users" class="section">
+      <h3>إدارة الناس</h3>
+      <div id="userList"></div>
     </div>
-
   </div>
 </div>
 
 <script>
+const OWNER_CODE="OWNER-999";
+
 function login(){
-  let user = document.getElementById("username").value.trim();
-  let code = document.getElementById("code").value.trim();
+  let u=user.value.trim(), c=code.value.trim();
+  if(!u)return alert("اكتب الاسم");
 
-  if(user === "" || code === ""){
-    alert("اكتب البيانات كاملة");
-    return;
+  let role="Player";
+  if(c){
+    if(c!==OWNER_CODE)return alert("كود غير صحيح");
+    role="Owner";
   }
 
-  localStorage.setItem("user", user);
+  localStorage.user=u;
+  localStorage.role=role;
 
-  document.getElementById("login").style.display="none";
-  document.getElementById("app").classList.remove("hidden");
-  document.getElementById("userName").innerText=user;
+  let users=JSON.parse(localStorage.users||"[]");
+  if(!users.find(x=>x.name===u)){
+    users.push({name:u,role:"Player",banned:false});
+    localStorage.users=JSON.stringify(users);
+  }
+
+  start();
 }
 
-function logout(){
-  localStorage.removeItem("user");
-  location.reload();
+function start(){
+  login.style.display="none";
+  app.classList.remove("hidden");
+  username.innerText=localStorage.user;
+  role.innerText=localStorage.role;
+
+  if(localStorage.role==="Owner")
+    document.querySelector(".ownerOnly").classList.remove("hidden");
+
+  renderUsers();
 }
 
-function showSection(id){
-  document.querySelectorAll(".section").forEach(sec=>{
-    sec.classList.remove("active");
-  });
+function logout(){localStorage.removeItem("user");localStorage.removeItem("role");location.reload();}
+
+function openSec(id,btn){
+  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
+  document.querySelectorAll(".nav").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
 }
 
-function buy(item){
-  alert("✅ تم اختيار " + item + " (تجريبي)");
+function sendTicket(){
+  let arr=JSON.parse(localStorage.tickets||"[]");
+  arr.push({user:localStorage.user,msg:tmsg.value});
+  localStorage.tickets=JSON.stringify(arr);
+  alert("تم إرسال الشكوى");
 }
 
-// دخول تلقائي
-window.onload = function(){
-  let user = localStorage.getItem("user");
-  if(user){
-    document.getElementById("login").style.display="none";
-    document.getElementById("app").classList.remove("hidden");
-    document.getElementById("userName").innerText=user;
-  }
+function renderUsers(){
+  if(localStorage.role!=="Owner")return;
+  let box=document.getElementById("userList");
+  let users=JSON.parse(localStorage.users||"[]");
+  box.innerHTML="";
+  users.forEach(u=>{
+    box.innerHTML+=`
+      <div class="user-card">
+        <b>${u.name}</b> | ${u.role}
+        <div class="actions">
+          <button onclick="setRole('${u.name}','Helper')">توظيف</button>
+          <button onclick="setRole('${u.name}','Admin')">ترقية</button>
+          <button onclick="setRole('${u.name}','Player')">فصل</button>
+          <button onclick="ban('${u.name}')">حظر</button>
+        </div>
+      </div>
+    `;
+  });
 }
+
+function setRole(name,role){
+  let users=JSON.parse(localStorage.users);
+  users.forEach(u=>{if(u.name===name)u.role=role});
+  localStorage.users=JSON.stringify(users);
+  renderUsers();
+}
+
+function ban(name){
+  let users=JSON.parse(localStorage.users);
+  users.forEach(u=>{if(u.name===name)u.banned=true});
+  localStorage.users=JSON.stringify(users);
+  alert("تم الحظر");
+  renderUsers();
+}
+
+window.onload=()=>localStorage.user&&start();
 </script>
 
 </body>
