@@ -3,133 +3,89 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QUEEN</title>
+<title>Queen Hotel</title>
 
 <style>
 *{box-sizing:border-box;font-family:Tahoma}
-
 body{
   margin:0;
   min-height:100vh;
   color:#fff;
-  background:#000;
+  background:
+    linear-gradient(rgba(0,0,0,.75),rgba(0,0,0,.85)),
+    url("https://i.imgur.com/DE0F3961.jpg");
+  background-size:cover;
+  background-position:center;
+  animation:bgMove 25s infinite alternate;
 }
-
-/* فيديو الخلفية */
-#loginVideo{
-  position:fixed;
-  inset:0;
-  z-index:-2;
-  overflow:hidden;
+@keyframes bgMove{
+  from{background-position:center top}
+  to{background-position:center bottom}
 }
-#loginVideo iframe{
-  width:100%;
-  height:100%;
-  pointer-events:none;
-}
-
-/* تعتيم */
-body::before{
-  content:"";
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.6);
-  z-index:-1;
-}
-
-.wrap{max-width:420px;margin:auto;padding:15px}
-
+.wrap{max-width:430px;margin:auto;padding:15px}
 .box{
-  background:rgba(0,0,0,.75);
+  background:rgba(0,0,40,.75);
   padding:20px;
   border-radius:18px;
+  box-shadow:0 0 30px #000;
 }
-
-/* لوجو */
-.logo{
+h1{
   text-align:center;
-  font-size:32px;
-  color:red;
-  animation:glow 2s infinite alternate;
+  color:#ff0000;
   margin-bottom:10px;
+  animation:glow 2s infinite alternate;
 }
 @keyframes glow{
   from{text-shadow:0 0 5px red}
-  to{text-shadow:0 0 20px red}
+  to{text-shadow:0 0 25px red}
 }
-
-input,button{
+input,button,textarea,select{
   width:100%;
-  padding:13px;
+  padding:12px;
   margin:6px 0;
   border:none;
   border-radius:12px;
-  font-size:14px;
 }
-
-input{background:#020d1f;color:#fff}
-
 button{
-  background:#1e90ff;
+  background:#0a66ff;
   color:#fff;
   font-weight:bold;
   cursor:pointer;
-  transition:transform .15s ease, box-shadow .15s ease;
 }
-button:hover{
-  transform:scale(1.03);
-  box-shadow:0 0 12px rgba(30,144,255,.6);
-}
-button:active{transform:scale(.97)}
-
 .nav{
   display:flex;
-  gap:6px;
+  gap:5px;
   margin-bottom:10px;
 }
-.nav button{flex:1}
-
+.nav button{flex:1;font-size:13px}
 .section{display:none}
 .section.active{display:block}
-
 .item{
-  background:#020d1f;
+  background:#0a0f2a;
   padding:12px;
   border-radius:12px;
   margin:6px 0;
 }
-
-.sideForm{
-  background:#00162e;
-  padding:15px;
-  border-radius:14px;
-  margin-top:10px;
-}
-
-@media(max-width:600px){
-  .wrap{max-width:100%}
-}
+.small{font-size:12px;opacity:.8}
+img{max-width:100%;border-radius:12px}
 </style>
 </head>
 
 <body>
 
-<!-- فيديو صفحة الدخول -->
-<div id="loginVideo">
-  <iframe
-    src="https://www.youtube.com/embed/GBZkBvdN3wU?autoplay=1&mute=1&controls=0&loop=1&playlist=GBZkBvdN3wU"
-    frameborder="0"
-    allow="autoplay; encrypted-media">
-  </iframe>
-</div>
-
 <!-- LOGIN -->
 <div id="loginBox">
   <div class="wrap">
     <div class="box">
-      <div class="logo">QUEEN</div>
+      <h1>QUEEN</h1>
       <input id="nameInput" placeholder="اسمك">
-      <input id="codeInput" placeholder="كود الصلاحية (اختياري)">
+      <select id="roleSelect">
+        <option value="client">عميل</option>
+        <option value="cafe">موظف كافيه</option>
+        <option value="hotel">موظف فندق</option>
+        <option value="owner">أونر</option>
+      </select>
+      <input id="codeInput" placeholder="كود (للموظفين)">
       <button onclick="login()">دخول</button>
     </div>
   </div>
@@ -140,17 +96,44 @@ button:active{transform:scale(.97)}
   <div class="wrap">
 
     <div class="nav">
-      <button onclick="showSection('rooms')">🏨</button>
-      <button onclick="showSection('orders')">🧾</button>
+      <button onclick="show('rooms')">🏨</button>
+      <button onclick="show('cafe')">☕</button>
+      <button onclick="show('news')">📰</button>
+      <button onclick="show('events')">🎉</button>
+      <button id="ordersBtn" onclick="show('orders')" style="display:none">📩</button>
       <button onclick="logout()">🚪</button>
     </div>
 
+    <!-- ROOMS -->
     <div id="rooms" class="section active">
-      <h3>الغرف</h3>
+      <h3>غرف الفندق</h3>
       <div id="roomsList"></div>
-      <div id="roomForm"></div>
     </div>
 
+    <!-- CAFE -->
+    <div id="cafe" class="section">
+      <h3>طلبات الكافيه</h3>
+      <div id="menuList"></div>
+    </div>
+
+    <!-- NEWS -->
+    <div id="news" class="section">
+      <h3>الأخبار</h3>
+      <div id="newsList"></div>
+      <textarea id="newsText" placeholder="خبر جديد (للأونر فقط)"></textarea>
+      <button onclick="addNews()">نشر</button>
+    </div>
+
+    <!-- EVENTS -->
+    <div id="events" class="section">
+      <h3>الحفلات</h3>
+      <div class="item">
+        <img src="https://i.imgur.com/DE0F3961.jpg">
+        <p class="small">حفلات Queen Plaza – العين السخنة</p>
+      </div>
+    </div>
+
+    <!-- ORDERS -->
     <div id="orders" class="section">
       <h3>الطلبات</h3>
       <div id="ordersList"></div>
@@ -159,134 +142,120 @@ button:active{transform:scale(.97)}
   </div>
 </div>
 
-<!-- أصوات -->
-<audio id="clickSound" src="click.mp3" preload="auto"></audio>
-<audio id="hoverSound" src="hover.mp3" preload="auto"></audio>
-
 <script>
-/* ===== الأصوات ===== */
-const clickSound=document.getElementById("clickSound");
-const hoverSound=document.getElementById("hoverSound");
+const OWNER_CODE="OWNER-QUEEN";
+const HOTEL_CODE="HOTEL-QUEEN";
+const CAFE_CODE="CAFE-QUEEN";
+const DRINKS=["قهوة","شاي","بيبسي","مياه"];
 
-document.addEventListener("click",e=>{
-  if(e.target.tagName==="BUTTON"){
-    clickSound.currentTime=0;
-    clickSound.play().catch(()=>{});
-  }
-});
-
-document.addEventListener("mouseover",e=>{
-  if(e.target.tagName==="BUTTON"){
-    hoverSound.currentTime=0;
-    hoverSound.play().catch(()=>{});
-  }
-});
-
-/* ===== الصلاحيات ===== */
-const CODES={
-  "QUEEN-HOTEL":"hotel",
-  "QUEEN-OWNER":"owner"
-};
-
-/* ===== تسجيل الدخول ===== */
 function login(){
   const name=nameInput.value.trim();
-  if(!name){alert("اكتب اسمك");return;}
+  const role=roleSelect.value;
+  const code=codeInput.value;
 
-  let role="client";
-  if(codeInput.value && CODES[codeInput.value]){
-    role=CODES[codeInput.value];
-  }
+  if(!name)return alert("اكتب اسمك");
 
-  localStorage.setItem("user",name);
-  localStorage.setItem("role",role);
+  if(role==="owner" && code!==OWNER_CODE)return alert("كود أونر غلط");
+  if(role==="hotel" && code!==HOTEL_CODE)return alert("كود الفندق غلط");
+  if(role==="cafe"  && code!==CAFE_CODE)return alert("كود الكافيه غلط");
 
-  startApp();
+  localStorage.user=name;
+  localStorage.role=role;
+  start();
 }
 
-/* ===== بدء التطبيق ===== */
-function startApp(){
-  loginVideo.style.display="none";
+function start(){
   loginBox.style.display="none";
   app.style.display="block";
-  renderRooms();
-  renderOrders();
+  if(localStorage.role!=="client") ordersBtn.style.display="block";
+  renderAll();
 }
 
-/* ===== تنقل ===== */
-function showSection(id){
+function show(id){
   document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
 
-/* ===== الغرف ===== */
 function renderRooms(){
   roomsList.innerHTML="";
   for(let i=1;i<=12;i++){
     roomsList.innerHTML+=`
-      <div class="item" onclick="openRoom(${i})">
-        غرفة رقم ${i}
+      <div class="item">
+        غرفة ${i}
+        <button onclick="sendOrder('حجز غرفة','غرفة '+${i})">طلب</button>
       </div>`;
   }
 }
 
-function openRoom(num){
-  if(localStorage.role!=="client"){
-    alert("الحجز للعملاء فقط");
-    return;
-  }
-  roomForm.innerHTML=`
-    <div class="sideForm">
-      <h4>حجز غرفة ${num}</h4>
-      <input id="phone" placeholder="رقم الهاتف">
-      <input id="from" type="date">
-      <input id="to" type="date">
-      <button onclick="sendBooking(${num})">إرسال</button>
-    </div>
-  `;
+function renderCafe(){
+  menuList.innerHTML="";
+  DRINKS.forEach(d=>{
+    menuList.innerHTML+=`
+      <div class="item">
+        ${d}
+        <button onclick="sendOrder('مشروب','${d}')">طلب</button>
+      </div>`;
+  });
 }
 
-/* ===== الطلبات ===== */
-function sendBooking(room){
-  if(!phone.value||!from.value||!to.value){
-    alert("كمل البيانات");
-    return;
-  }
-  const arr=JSON.parse(localStorage.getItem("orders")||"[]");
-  arr.push({
-    room,
+function sendOrder(type,val){
+  const orders=JSON.parse(localStorage.orders||"[]");
+  orders.push({
     user:localStorage.user,
-    time:new Date().toLocaleString()
+    role:localStorage.role,
+    type,val,
+    time:new Date().toLocaleTimeString()
   });
-  localStorage.setItem("orders",JSON.stringify(arr));
-  alert("تم الإرسال");
-  roomForm.innerHTML="";
-  renderOrders();
+  localStorage.orders=JSON.stringify(orders);
+  alert("تم الإرسال ✔");
 }
 
 function renderOrders(){
   ordersList.innerHTML="";
-  const arr=JSON.parse(localStorage.getItem("orders")||"[]");
-  arr.forEach(o=>{
+  const orders=JSON.parse(localStorage.orders||"[]");
+  orders.forEach(o=>{
     ordersList.innerHTML+=`
-      <div class="item">
-        غرفة ${o.room}<br>
-        ${o.user}<br>
-        ${o.time}
-      </div>
-    `;
+      <div class="item small">
+        ${o.user} | ${o.type} | ${o.val} | ${o.time}
+      </div>`;
   });
 }
 
-/* ===== خروج ===== */
+function addNews(){
+  if(localStorage.role!=="owner")return;
+  if(!newsText.value)return;
+  const news=JSON.parse(localStorage.news||"[]");
+  news.unshift(newsText.value);
+  localStorage.news=JSON.stringify(news);
+  newsText.value="";
+}
+
+function renderNews(){
+  newsList.innerHTML="";
+  const news=JSON.parse(localStorage.news||"[]");
+  news.forEach(n=>{
+    newsList.innerHTML+=`<div class="item">${n}</div>`;
+  });
+}
+
+function renderAll(){
+  renderRooms();
+  renderCafe();
+  renderOrders();
+  renderNews();
+}
+
+setInterval(()=>{
+  if(localStorage.role!=="client")renderOrders();
+  renderNews();
+},1000);
+
 function logout(){
   localStorage.clear();
   location.reload();
 }
 
-window.onload=()=>{
-  if(localStorage.user) startApp();
-};
+if(localStorage.user)start();
 </script>
 
 </body>
