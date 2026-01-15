@@ -3,47 +3,57 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QUEEN System</title>
+<title>QUEEN HOTEL</title>
 
 <style>
-*{box-sizing:border-box;font-family:Tajawal, Tahoma}
+*{box-sizing:border-box;font-family:Tahoma}
+
+/* فيديو الخلفية */
+#bgVideo{
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  object-fit:cover;
+  z-index:-2;
+}
+
+/* طبقة تعتيم */
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  z-index:-1;
+}
+
 body{
   margin:0;
   min-height:100vh;
-  background:
-    radial-gradient(circle at top,#0a3d62,#020824 60%),
-    linear-gradient(270deg,#000,#001a33,#000);
-  background-size:200% 200%;
-  animation:bgMove 15s ease infinite;
   color:#fff;
 }
-@keyframes bgMove{
-  0%{background-position:0% 50%}
-  50%{background-position:100% 50%}
-  100%{background-position:0% 50%}
-}
 
-.wrap{max-width:430px;margin:auto;padding:15px}
+.wrap{max-width:420px;margin:auto;padding:15px}
+
 .box{
   background:rgba(0,0,0,.75);
   padding:20px;
   border-radius:18px;
-  box-shadow:0 0 30px rgba(0,120,255,.25);
 }
 
+/* لوجو */
 .logo{
   text-align:center;
   font-size:30px;
-  color:#ff2d2d;
+  color:red;
   animation:glow 2s infinite alternate;
   margin-bottom:10px;
 }
 @keyframes glow{
-  from{text-shadow:0 0 5px #ff2d2d}
-  to{text-shadow:0 0 20px #ff2d2d}
+  from{text-shadow:0 0 5px red}
+  to{text-shadow:0 0 20px red}
 }
 
-input,select,button,textarea{
+input,button,textarea{
   width:100%;
   padding:13px;
   margin:6px 0;
@@ -51,14 +61,14 @@ input,select,button,textarea{
   border-radius:12px;
   font-size:14px;
 }
-input,textarea,select{background:#020d1f;color:#fff}
+input,textarea{background:#020d1f;color:#fff}
+
 button{
   background:#1e90ff;
   color:#fff;
   font-weight:bold;
   cursor:pointer;
 }
-button.red{background:#c0392b}
 
 .nav{
   display:flex;
@@ -86,10 +96,20 @@ button.red{background:#c0392b}
   border-radius:14px;
   margin-top:10px;
 }
+
+/* موبايل */
+@media(max-width:600px){
+  .wrap{max-width:100%}
+}
 </style>
 </head>
 
 <body>
+
+<!-- فيديو الخلفية -->
+<video autoplay muted loop playsinline id="bgVideo">
+  <source src="ain-sokhna.mp4" type="video/mp4">
+</video>
 
 <!-- LOGIN -->
 <div id="loginBox">
@@ -141,14 +161,14 @@ button.red{background:#c0392b}
 </div>
 
 <script>
-/* ===== CODES ===== */
+/* الأكواد */
 const CODES={
   "QUEEN-HOTEL":"hotel",
   "QUEEN-CAFE":"cafe",
   "QUEEN-OWNER":"owner"
 };
 
-/* ===== LOGIN ===== */
+/* تسجيل الدخول */
 function login(){
   const name=nameInput.value.trim();
   if(!name){alert("اكتب اسمك");return;}
@@ -163,7 +183,7 @@ function login(){
   start();
 }
 
-/* ===== START ===== */
+/* بدء التطبيق */
 function start(){
   loginBox.style.display="none";
   app.style.display="block";
@@ -177,13 +197,13 @@ function start(){
   renderAll();
 }
 
-/* ===== NAV ===== */
+/* تنقل */
 function show(id){
   document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
 
-/* ===== ROOMS ===== */
+/* الغرف */
 function renderRooms(){
   roomsList.innerHTML="";
   for(let i=1;i<=12;i++){
@@ -210,42 +230,56 @@ function openRoom(num){
   `;
 }
 
+/* إرسال الحجز */
 function sendBooking(room){
   if(!phone.value||!from.value||!to.value){
     alert("كمل البيانات");
     return;
   }
-  saveOrder("حجز غرفة","غرفة "+room,localStorage.user);
-  alert("تم الإرسال");
+
+  saveOrder(
+    "حجز غرفة",
+    "غرفة رقم "+room,
+    localStorage.user
+  );
+
+  alert("تم إرسال الحجز ✅");
   roomForm.innerHTML="";
 }
 
-/* ===== ORDERS ===== */
+/* حفظ الطلب */
 function saveOrder(type,item,user){
   const arr=JSON.parse(localStorage.getItem("orders")||"[]");
-  arr.push({type,item,user,time:new Date().toLocaleString()});
+  arr.push({
+    type,item,user,
+    time:new Date().toLocaleString()
+  });
   localStorage.setItem("orders",JSON.stringify(arr));
   renderOrders();
 }
 
+/* عرض الطلبات */
 function renderOrders(){
   ordersList.innerHTML="";
   const role=localStorage.role;
   const arr=JSON.parse(localStorage.getItem("orders")||"[]");
 
   arr.forEach(o=>{
-    if(role==="hotel" && o.type!=="حجز غرفة")return;
-    if(role==="cafe" && o.type!=="طلب كافيه")return;
-    if(role==="client")return;
+    if(role==="hotel" && o.type!=="حجز غرفة") return;
+    if(role==="client") return;
 
     ordersList.innerHTML+=`
       <div class="item small">
-        ${o.type} | ${o.item} | ${o.user}<br>${o.time}
-      </div>`;
+        ${o.type}<br>
+        ${o.item}<br>
+        ${o.user}<br>
+        ${o.time}
+      </div>
+    `;
   });
 }
 
-/* ===== NEWS ===== */
+/* الأخبار */
 function addNews(){
   if(!newsText.value)return;
   const n=JSON.parse(localStorage.getItem("news")||"[]");
@@ -260,20 +294,20 @@ function renderNews(){
   n.forEach(x=>newsList.innerHTML+=`<div class="item">${x}</div>`);
 }
 
-/* ===== RENDER ALL ===== */
+/* رسم الكل */
 function renderAll(){
   renderRooms();
   renderOrders();
   renderNews();
 }
 
-/* 🔄 تحديث تلقائي */
+/* تحديث تلقائي */
 setInterval(()=>{
   if(localStorage.role!=="client") renderOrders();
   renderNews();
 },2000);
 
-/* ===== LOGOUT ===== */
+/* خروج */
 function logout(){
   localStorage.clear();
   location.reload();
