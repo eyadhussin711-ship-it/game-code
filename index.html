@@ -7,8 +7,7 @@
 <style>
 *{box-sizing:border-box;font-family:Arial}
 body{
-  margin:0;
-  height:100vh;
+  margin:0;height:100vh;
   background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
   color:#fff;
 }
@@ -16,22 +15,15 @@ body{
 
 /* LOGIN */
 #login{
-  height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
+  height:100vh;display:flex;
+  justify-content:center;align-items:center;
 }
 .login-box{
-  width:360px;
-  background:#102a36;
-  padding:25px;
-  border-radius:16px;
-  text-align:center;
+  width:360px;background:#102a36;
+  padding:25px;border-radius:16px;text-align:center;
 }
 .title{
-  font-size:32px;
-  font-weight:bold;
-  margin-bottom:15px;
+  font-size:32px;font-weight:bold;margin-bottom:15px;
   background:linear-gradient(270deg,#ffd700,#ffb703,#fff,#ffd700);
   background-size:600% 600%;
   -webkit-background-clip:text;
@@ -44,9 +36,12 @@ body{
   100%{background-position:0% 50%}
 }
 .login-box input,.login-box button{
-  width:100%;padding:12px;margin:8px 0;border:none;border-radius:10px;
+  width:100%;padding:12px;margin:8px 0;
+  border:none;border-radius:10px;
 }
-.login-box button{background:#00f5ff;font-weight:bold;cursor:pointer}
+.login-box button{
+  background:#00f5ff;font-weight:bold;cursor:pointer;
+}
 
 /* APP */
 #app{display:none;height:100vh}
@@ -54,9 +49,7 @@ body{
 
 /* SIDEBAR */
 .sidebar{
-  width:220px;
-  background:#102a36;
-  padding:15px;
+  width:220px;background:#102a36;padding:15px;
 }
 .sidebar button{
   width:100%;margin:6px 0;padding:10px;
@@ -69,32 +62,19 @@ body{
 .section{display:none}
 .section.active{display:block}
 
-/* CARDS */
-.card{
-  background:#1f3b4d;
-  padding:15px;
-  border-radius:14px;
-  margin:10px 0;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-.buy{background:#ffd166;border:none;padding:8px 18px;border-radius:20px}
-
-/* USERS LIST */
+/* USERS */
 .user{
   background:#0f2027;
-  padding:10px;
-  margin:6px 0;
+  padding:10px;margin:6px 0;
   border-radius:10px;
-  display:flex;
-  justify-content:space-between;
+  display:flex;justify-content:space-between;
 }
 select{border-radius:6px}
 
 /* FOOTER */
 .footer{
-  position:fixed;bottom:6px;right:10px;font-size:12px;opacity:.7;
+  position:fixed;bottom:6px;right:10px;
+  font-size:12px;opacity:.7;
 }
 </style>
 </head>
@@ -118,8 +98,7 @@ select{border-radius:6px}
 
 <div class="sidebar">
   <button onclick="openSec('store')">🛒 المتجر</button>
-  <button onclick="openSec('tickets')">🧾 الشكاوي</button>
-  <button id="adminBtn" class="hidden" onclick="openSec('admin')">👑 الإدارة</button>
+  <button onclick="openSec('admin')" id="adminBtn" class="hidden">👑 الإدارة</button>
   <button onclick="logout()">🚪 خروج</button>
 </div>
 
@@ -127,18 +106,11 @@ select{border-radius:6px}
 
 <div id="store" class="section active">
   <h2 id="welcome"></h2>
-  <div class="card"><span>60 UC</span><button class="buy">شراء</button></div>
-  <div class="card"><span>300 UC</span><button class="buy">شراء</button></div>
-  <div class="card"><span>600 UC</span><button class="buy">شراء</button></div>
-</div>
-
-<div id="tickets" class="section">
-  <h3>الشكاوي</h3>
-  <p>قريبًا…</p>
+  <p>أهلاً بك في المتجر</p>
 </div>
 
 <div id="admin" class="section">
-  <h3>لوحة الأونر</h3>
+  <h3>👥 المستخدمين</h3>
   <div id="usersList"></div>
 </div>
 
@@ -146,40 +118,45 @@ select{border-radius:6px}
 </div>
 </div>
 
-<audio id="clickSound" src="https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3"></audio>
-
 <div class="footer">© Eyad Abo Gad</div>
 
 <script>
-const OWNER_CODE="OWNER-999";
+const OWNER_CODE = "OWNER-999";
 
-/* USERS */
-let users = JSON.parse(localStorage.getItem("users")||"[]");
+/* SAFE GET USERS */
+function getUsers(){
+  return JSON.parse(localStorage.getItem("users") || "[]");
+}
+function saveUsers(arr){
+  localStorage.setItem("users", JSON.stringify(arr));
+}
 
 /* LOGIN */
 function login(){
-  let u=username.value.trim();
+  let u = username.value.trim();
   if(!u) return alert("اكتب اسمك");
 
-  let role = (code.value===OWNER_CODE)?"Owner":"Player";
+  let role = (code.value === OWNER_CODE) ? "Owner" : "Player";
+  let users = getUsers();
 
-  if(!users.find(x=>x.name===u)){
-    users.push({name:u,role:role});
-    localStorage.setItem("users",JSON.stringify(users));
+  let me = users.find(x => x.name === u);
+  if(!me){
+    users.push({name:u, role});
+    saveUsers(users);
   }
 
-  localStorage.user=u;
-  localStorage.role=role;
-  showApp();
+  localStorage.user = u;
+  localStorage.role = role;
+  start();
 }
 
-/* APP */
-function showApp(){
-  login.style.display="none";
-  app.style.display="block";
-  welcome.innerText="أهلاً "+localStorage.user;
+/* START APP */
+function start(){
+  document.getElementById("login").style.display="none";
+  document.getElementById("app").style.display="block";
+  welcome.innerText = "أهلاً " + localStorage.user;
 
-  if(localStorage.role==="Owner"){
+  if(localStorage.role === "Owner"){
     adminBtn.classList.remove("hidden");
     renderUsers();
   }
@@ -188,41 +165,46 @@ function showApp(){
 
 /* USERS LIST */
 function renderUsers(){
-  usersList.innerHTML="";
+  let users = getUsers();
+  usersList.innerHTML = "";
   users.forEach((u,i)=>{
-    usersList.innerHTML+=`
-    <div class="user">
-      <span>${u.name}</span>
-      <select onchange="setRole(${i},this.value)">
-        <option ${u.role=="Player"?"selected":""}>Player</option>
-        <option ${u.role=="Helper"?"selected":""}>Helper</option>
-        <option ${u.role=="Admin"?"selected":""}>Admin</option>
-      </select>
-    </div>`;
+    usersList.innerHTML += `
+      <div class="user">
+        <span>${u.name}</span>
+        <select onchange="changeRole(${i},this.value)">
+          <option ${u.role==="Player"?"selected":""}>Player</option>
+          <option ${u.role==="Helper"?"selected":""}>Helper</option>
+          <option ${u.role==="Admin"?"selected":""}>Admin</option>
+        </select>
+      </div>
+    `;
   });
 }
-function setRole(i,val){
-  users[i].role=val;
-  localStorage.setItem("users",JSON.stringify(users));
+function changeRole(i,val){
+  let users = getUsers();
+  users[i].role = val;
+  saveUsers(users);
 }
 
 /* NAV */
 function openSec(id){
   document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
-  clickSound.play();
 }
 
 /* LOGOUT */
 function logout(){
-  localStorage.clear();
+  localStorage.removeItem("user");
+  localStorage.removeItem("role");
   location.reload();
 }
 
-/* AUTO */
-window.onload=()=>{
-  if(localStorage.user) showApp();
-}
+/* AUTO LOGIN */
+window.onload = ()=>{
+  if(localStorage.user && localStorage.role){
+    start();
+  }
+};
 </script>
 
 </body>
