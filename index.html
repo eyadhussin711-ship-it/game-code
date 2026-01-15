@@ -218,7 +218,58 @@ window.onload = ()=>{
     startApp();
   }
 };
-</script>
+  <!-- كود Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } 
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBA2YeC6Mo8CZi7Ms5Gckhm4SWPmLgFNcE",
+  authDomain: "queenhotel-5703c.firebaseapp.com",
+  projectId: "queenhotel-5703c",
+  storageBucket: "queenhotel-5703c.firebasestorage.app",
+  messagingSenderId: "1024771547857",
+  appId: "1:1024771547857:web:8dd74f752bf0a4b6999bf0"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* === إرسال طلب === */
+window.makeOrder = async function(drink){
+  let room = prompt("اختر رقم الغرفة من 1 إلى 12");
+  room = Number(room);
+  if(!room || room < 1 || room > 12){
+    alert("رقم الغرفة غلط");
+    return;
+  }
+
+  await addDoc(collection(db,"orders"),{
+    user: localStorage.getItem("user"),
+    room,
+    drink,
+    time: serverTimestamp()
+  });
+
+  alert("تم إرسال الطلب ✅");
+};
+
+/* === متابعة الطلبات (Live) === */
+const ordersList = document.getElementById("ordersList");
+onSnapshot(collection(db,"orders"), snap=>{
+  if(!ordersList) return;
+  ordersList.innerHTML="";
+  snap.forEach(doc=>{
+    const o = doc.data();
+    ordersList.innerHTML += `
+      <div class="item small">
+        ${o.user} | غرفة ${o.room} | ${o.drink}
+      </div>`;
+  });
+});
+\</script>
 
 </body>
 </html>
+
