@@ -8,32 +8,59 @@
 <style>
 *{box-sizing:border-box;font-family:Tahoma}
 body{
-  margin:0; min-height:100vh; color:#fff;
-  background:linear-gradient(270deg,#000,#001a4d,#000);
+  margin:0;min-height:100vh;color:#fff;
+  background:linear-gradient(270deg,#000,#001f4d,#000);
   background-size:400% 400%;
-  animation:bg 12s infinite;
+  animation:bg 15s infinite;
 }
 @keyframes bg{
   0%{background-position:0% 50%}
   50%{background-position:100% 50%}
   100%{background-position:0% 50%}
 }
-.wrap{max-width:430px;margin:auto;padding:15px}
-.box{background:rgba(0,0,40,.85);padding:18px;border-radius:16px}
-h1{text-align:center;color:red;animation:glow 1.5s infinite alternate}
-@keyframes glow{from{text-shadow:0 0 5px red}to{text-shadow:0 0 20px red}}
-input,select,textarea,button{
-  width:100%;padding:12px;margin:6px 0;border:none;border-radius:10px
+.wrap{max-width:420px;margin:auto;padding:15px}
+.box{
+  background:rgba(0,0,30,.8);
+  padding:20px;border-radius:18px;
+  box-shadow:0 0 30px #000;
+}
+h1{
+  text-align:center;
+  color:red;
+  animation:glow 1.5s infinite alternate;
+}
+@keyframes glow{
+  from{text-shadow:0 0 5px red}
+  to{text-shadow:0 0 20px red}
+}
+input,button,select{
+  width:100%;padding:12px;margin:6px 0;
+  border:none;border-radius:12px;
 }
 button{background:#0a66ff;color:#fff;font-weight:bold}
 .nav{display:flex;gap:5px;margin-bottom:10px}
-.nav button{flex:1}
+.nav button{flex:1;font-size:13px}
 .section{display:none}
 .section.active{display:block}
-.item{background:#050b2a;padding:10px;border-radius:10px;margin:6px 0}
-.small{font-size:12px;opacity:.85}
-.badge{float:left;font-weight:bold}
-.b1{color:#3cff00} .b2{color:#ffd000} .b3{color:#ff2a2a} .b4{color:#3aa0ff}
+.item{
+  background:#0a1a3a;
+  padding:12px;border-radius:14px;
+  margin:8px 0;
+}
+.room.free{border-left:6px solid #00ff88}
+.room.booked{border-left:6px solid #ff3333}
+
+.order-card{
+  background:#0f2b6b;
+  border-radius:14px;
+  padding:12px;
+  margin:10px 0;
+}
+.order-actions{display:flex;gap:6px;margin-top:8px}
+.order-actions button{flex:1;padding:8px}
+.btn-ok{background:#00c853}
+.btn-cancel{background:#ff1744}
+.small{font-size:12px;opacity:.8}
 </style>
 </head>
 
@@ -48,6 +75,7 @@ button{background:#0a66ff;color:#fff;font-weight:bold}
       <select id="roleSelect">
         <option value="client">عميل</option>
         <option value="hotel">موظف فندق</option>
+        <option value="cafe">موظف كافيه</option>
         <option value="owner">أونر</option>
       </select>
       <input id="codeInput" placeholder="كود (للموظفين)">
@@ -62,7 +90,7 @@ button{background:#0a66ff;color:#fff;font-weight:bold}
 
     <div class="nav">
       <button onclick="show('rooms')">🏨</button>
-      <button onclick="show('orders')" id="ordersBtn" style="display:none">📩</button>
+      <button onclick="show('orders')">📩</button>
       <button onclick="logout()">🚪</button>
     </div>
 
@@ -74,7 +102,7 @@ button{background:#0a66ff;color:#fff;font-weight:bold}
 
     <!-- ORDERS -->
     <div id="orders" class="section">
-      <h3>طلبات الغرف</h3>
+      <h3>طلبات الموظفين</h3>
       <div id="ordersList"></div>
     </div>
 
@@ -83,119 +111,103 @@ button{background:#0a66ff;color:#fff;font-weight:bold}
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import {
-  getFirestore, collection, addDoc, onSnapshot,
-  doc, getDoc, setDoc, updateDoc
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc } 
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBA2YeC6Mo8CZi7Ms5Gckhm4SWPmLgFNcE",
   authDomain: "queenhotel-5703c.firebaseapp.com",
   projectId: "queenhotel-5703c",
 };
-const appFB = initializeApp(firebaseConfig);
-const db = getFirestore(appFB);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-const OWNER="OWNER-QUEEN";
-const HOTEL="HOTEL-QUEEN";
+const OWNER="OWNER-QUEEN", HOTEL="HOTEL-QUEEN", CAFE="CAFE-QUEEN";
 
-// ===== AUTH =====
-window.login=()=>{
+window.login=function(){
   const n=nameInput.value.trim();
   const r=roleSelect.value;
   const c=codeInput.value;
-  if(!n) return alert("اكتب اسمك");
-  if(r==="owner" && c!==OWNER) return alert("كود غلط");
-  if(r==="hotel" && c!==HOTEL) return alert("كود غلط");
-  localStorage.user=n; localStorage.role=r;
+  if(!n)return alert("اكتب اسمك");
+  if(r==="owner"&&c!==OWNER)return alert("كود غلط");
+  if(r==="hotel"&&c!==HOTEL)return alert("كود غلط");
+  if(r==="cafe"&&c!==CAFE)return alert("كود غلط");
+  localStorage.user=n;
+  localStorage.role=r;
+  start();
+}
+
+function start(){
   loginBox.style.display="none";
   app.style.display="block";
-  if(r!=="client") ordersBtn.style.display="block";
   loadRooms();
-};
+  loadOrders();
+}
 
-// ===== NAV =====
 window.show=id=>{
   document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
-};
+}
 
-// ===== ROOMS =====
-async function loadRooms(){
+function loadRooms(){
   roomsList.innerHTML="";
-  for(let i=1;i<=12;i++){
-    const ref=doc(db,"rooms","room"+i);
-    const snap=await getDoc(ref);
-    let status=1; // default فاضية
-    if(snap.exists()) status=snap.data().status;
-    else await setDoc(ref,{number:i,status:1});
-
+  for(let i=1;i<=4;i++){
     roomsList.innerHTML+=`
-      <div class="item">
-        <b>غرفة ${i}</b>
-        <span class="badge b${status}">● ${status}</span>
-        <button onclick="openForm(${i})">طلب</button>
-        <div id="form${i}" style="display:none">
-          <input id="people${i}" placeholder="عدد الأشخاص">
-          <input id="date${i}" placeholder="تاريخ الدخول">
-          <textarea id="note${i}" placeholder="ملاحظات"></textarea>
-          <button onclick="sendRoomOrder(${i})">إرسال</button>
-        </div>
+      <div class="item room free">
+        🏨 غرفة ${i}
+        <button onclick="bookRoom(${i})">حجز</button>
       </div>`;
   }
 }
 
-window.openForm=i=>{
-  document.getElementById("form"+i).style.display="block";
-};
-
-// ===== SEND ORDER =====
-window.sendRoomOrder=async(room)=>{
-  const people=document.getElementById("people"+room).value;
-  const date=document.getElementById("date"+room).value;
-  if(!people||!date) return alert("كمل البيانات");
+window.bookRoom=async function(room){
+  if(localStorage.role!=="client")return;
+  const phone=prompt("رقم الهاتف");
+  const days=prompt("عدد الأيام");
+  if(!phone||!days)return;
   await addDoc(collection(db,"orders"),{
-    room, people, date,
-    user:localStorage.user,
-    time:new Date().toLocaleString()
+    room,client:localStorage.user,phone,days,
+    time:new Date().toLocaleTimeString(),
+    status:"pending"
   });
-  alert("تم الإرسال ✔");
-};
+  alert("تم إرسال الطلب ✔");
+}
 
-// ===== ORDERS + STATUS CONTROLS =====
-onSnapshot(collection(db,"orders"), snap=>{
-  ordersList.innerHTML="";
-  snap.forEach(d=>{
-    const o=d.data();
-    let controls="";
-    if(localStorage.role!=="client"){
-      controls=`
-        <button onclick="setStatus(${o.room},1)">1 فاضية</button>
-        <button onclick="setStatus(${o.room},2)">2 حجز</button>
-        <button onclick="setStatus(${o.room},3)">3 تأجير</button>
-        <button onclick="setStatus(${o.room},4)">4 صيانة</button>
-      `;
-    }
-    ordersList.innerHTML+=`
-      <div class="item small">
-        👤 ${o.user} | 🏨 غرفة ${o.room}<br>
-        👥 ${o.people} | 📅 ${o.date}<br>
-        ${controls}
-      </div>`;
+function loadOrders(){
+  onSnapshot(collection(db,"orders"),snap=>{
+    ordersList.innerHTML="";
+    snap.forEach(d=>{
+      const o=d.data();
+      ordersList.innerHTML+=`
+        <div class="order-card">
+          <b>غرفة ${o.room}</b><br>
+          👤 ${o.client}<br>
+          📞 ${o.phone}<br>
+          ⏳ ${o.days} أيام
+          <div class="order-actions">
+            <button class="btn-ok" onclick="finish('${d.id}')">تم</button>
+            <button class="btn-cancel" onclick="cancel('${d.id}')">إلغاء</button>
+          </div>
+        </div>`;
+    });
   });
-});
+}
 
-// ===== SET ROOM STATUS =====
-window.setStatus=async(room,status)=>{
-  await updateDoc(doc(db,"rooms","room"+room),{status});
-  loadRooms();
-};
+window.finish=async id=>{
+  await updateDoc(doc(db,"orders",id),{status:"done"});
+  alert("تم التأجير ✔");
+}
+window.cancel=async id=>{
+  await updateDoc(doc(db,"orders",id),{status:"cancel"});
+  alert("تم الإلغاء ❌");
+}
 
-// ===== LOGOUT =====
 window.logout=()=>{
   localStorage.clear();
   location.reload();
-};
+}
+
+if(localStorage.user)start();
 </script>
 
 </body>
