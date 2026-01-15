@@ -2,7 +2,7 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>UC Store</title>
+<title>EYAD UC STORE</title>
 
 <style>
 *{box-sizing:border-box;font-family:Arial}
@@ -13,7 +13,7 @@ body{
   color:#fff;
 }
 
-/* LOGIN */
+/* ===== LOGIN ===== */
 #login{
   height:100vh;
   display:flex;
@@ -21,12 +21,30 @@ body{
   align-items:center;
 }
 .login-box{
-  width:330px;
-  background:#1f3b4d;
+  width:360px;
+  background:#102a36;
   padding:25px;
-  border-radius:14px;
+  border-radius:16px;
   text-align:center;
 }
+
+/* animated title */
+.title{
+  font-size:32px;
+  font-weight:bold;
+  margin-bottom:15px;
+  background:linear-gradient(270deg,#ffd700,#ffb703,#fff,#ffd700);
+  background-size:600% 600%;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation:gold 4s ease infinite;
+}
+@keyframes gold{
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+
 .login-box input,
 .login-box button{
   width:100%;
@@ -41,17 +59,17 @@ body{
   cursor:pointer;
 }
 
-/* APP */
+/* ===== APP ===== */
 #app{display:none;height:100vh}
 .app{display:flex;height:100%}
 
-/* SIDEBAR */
+/* sidebar */
 .sidebar{
-  width:230px;
+  width:220px;
   background:#102a36;
   padding:15px;
 }
-.sidebar h3{text-align:center;margin-bottom:20px}
+.sidebar h3{text-align:center;margin-bottom:15px}
 .sidebar button{
   width:100%;
   margin:6px 0;
@@ -63,15 +81,19 @@ body{
   cursor:pointer;
 }
 
-/* CONTENT */
-.content{flex:1;padding:20px}
+/* content */
+.content{
+  flex:1;
+  padding:20px;
+}
 .section{display:none}
 .section.active{display:block}
 
+/* cards */
 .card{
   background:#1f3b4d;
   padding:15px;
-  border-radius:12px;
+  border-radius:14px;
   margin:10px 0;
   display:flex;
   justify-content:space-between;
@@ -80,28 +102,15 @@ body{
 .buy{
   background:#ffd166;
   border:none;
-  padding:8px 16px;
+  padding:8px 18px;
   border-radius:20px;
   cursor:pointer;
 }
 
-/* CHAT */
-.chat{
-  background:#0f2027;
-  padding:10px;
-  border-radius:10px;
-  height:200px;
-  overflow:auto;
-  margin-bottom:8px;
-}
-.msg{margin:4px 0}
-.me{color:#00f5ff}
-.admin{color:#ffd166}
-
-/* FOOTER */
+/* footer */
 .footer{
   position:fixed;
-  bottom:5px;
+  bottom:6px;
   right:10px;
   font-size:12px;
   opacity:.7;
@@ -114,10 +123,12 @@ body{
 <!-- LOGIN -->
 <div id="login">
   <div class="login-box">
-    <h3>تسجيل الدخول</h3>
+    <div class="title">EYAD UC STORE</div>
+
     <input id="username" placeholder="اسمك">
     <input id="code" placeholder="كود الأونر (اختياري)">
     <button onclick="login()">دخول</button>
+
     <small>Developer: Eyad Abo Gad</small>
   </div>
 </div>
@@ -126,87 +137,68 @@ body{
 <div id="app">
   <div class="app">
 
-    <!-- SIDEBAR -->
     <div class="sidebar">
-      <h3>UC STORE</h3>
+      <h3>القائمة</h3>
       <button onclick="openSec('store')">🛒 المتجر</button>
       <button onclick="openSec('tickets')">🧾 الشكاوي</button>
       <button id="ownerBtn" style="display:none" onclick="openSec('admin')">👑 الإدارة</button>
       <button onclick="logout()">🚪 خروج</button>
     </div>
 
-    <!-- CONTENT -->
     <div class="content">
 
       <!-- STORE -->
       <div id="store" class="section active">
         <h2 id="welcome"></h2>
-        <div class="card"><span>60 UC</span><button class="buy" onclick="sound()">شراء</button></div>
-        <div class="card"><span>300 UC</span><button class="buy" onclick="sound()">شراء</button></div>
-        <div class="card"><span>600 UC</span><button class="buy" onclick="sound()">شراء</button></div>
+
+        <div class="card"><span>60 UC</span><button class="buy">شراء</button></div>
+        <div class="card"><span>300 UC</span><button class="buy">شراء</button></div>
+        <div class="card"><span>600 UC</span><button class="buy">شراء</button></div>
       </div>
 
       <!-- TICKETS -->
       <div id="tickets" class="section">
-        <h3>🧾 الشكاوي</h3>
-        <input id="ticketText" placeholder="اكتب الشكوى">
-        <button onclick="newTicket()">فتح شكوى</button>
-        <div id="myTickets"></div>
+        <h3>الشكاوي</h3>
+        <p>قريبًا…</p>
       </div>
 
       <!-- ADMIN -->
       <div id="admin" class="section">
-        <h3>👑 لوحة الإدارة</h3>
-        <div id="allTickets"></div>
-      </div>
-
-      <!-- CHAT -->
-      <div id="chat" class="section">
-        <h3>💬 روم الشكوى</h3>
-        <div class="chat" id="chatBox"></div>
-        <input id="chatMsg" placeholder="اكتب رسالة">
-        <button onclick="sendMsg()">إرسال</button>
+        <h3>لوحة الأونر</h3>
+        <p>تحكم كامل</p>
       </div>
 
     </div>
   </div>
 </div>
 
-<div class="footer">© Developed by Eyad Abo Gad</div>
-
-<audio id="clickSound">
-  <source src="https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3">
-</audio>
+<div class="footer">© Eyad Abo Gad</div>
 
 <script>
 const OWNER_CODE="OWNER-999";
-let currentTicket=null;
 
-/* SOUND */
-function sound(){
-  document.getElementById("clickSound").play();
-}
-
-/* LOGIN */
+/* LOGIN FIXED */
 function login(){
   let u=username.value.trim();
-  if(!u)return alert("اكتب اسمك");
+  if(!u){ alert("اكتب اسمك"); return; }
 
-  let role = (code.value===OWNER_CODE)?"Owner":"Player";
   localStorage.user=u;
-  localStorage.role=role;
+  localStorage.role=(code.value===OWNER_CODE)?"Owner":"Player";
 
-  start();
+  loginPage();
 }
 
-function start(){
-  login.style.display="none";
-  app.style.display="block";
+function loginPage(){
+  document.getElementById("login").style.display="none";
+  document.getElementById("app").style.display="block";
+
   welcome.innerText="أهلاً "+localStorage.user;
 
   if(localStorage.role==="Owner"){
     ownerBtn.style.display="block";
   }
+
+  openSec("store"); // ← ده الإصلاح المهم
 }
 
 /* NAV */
@@ -215,61 +207,18 @@ function openSec(id){
   document.getElementById(id).classList.add("active");
 }
 
-/* TICKETS */
-function newTicket(){
-  let t=ticketText.value.trim();
-  if(!t)return;
-  let arr=JSON.parse(localStorage.tickets||"[]");
-  arr.push({id:Date.now(),user:localStorage.user,msgs:[{from:"me",text:t}]});
-  localStorage.tickets=JSON.stringify(arr);
-  ticketText.value="";
-  loadMyTickets();
-}
-
-function loadMyTickets(){
-  let arr=JSON.parse(localStorage.tickets||"[]");
-  myTickets.innerHTML="";
-  arr.filter(x=>x.user===localStorage.user)
-     .forEach(t=>myTickets.innerHTML+=`<div onclick="openChat(${t.id})">شكوى #${t.id}</div>`);
-}
-
-function loadAllTickets(){
-  let arr=JSON.parse(localStorage.tickets||"[]");
-  allTickets.innerHTML="";
-  arr.forEach(t=>allTickets.innerHTML+=`<div onclick="openChat(${t.id})">${t.user} - #${t.id}</div>`);
-}
-
-function openChat(id){
-  currentTicket=id;
-  openSec("chat");
-  renderChat();
-}
-
-function renderChat(){
-  let arr=JSON.parse(localStorage.tickets);
-  let t=arr.find(x=>x.id===currentTicket);
-  chatBox.innerHTML="";
-  t.msgs.forEach(m=>chatBox.innerHTML+=`<div class="msg ${m.from}">${m.text}</div>`);
-}
-
-function sendMsg(){
-  let txt=chatMsg.value.trim();
-  if(!txt)return;
-  let arr=JSON.parse(localStorage.tickets);
-  let t=arr.find(x=>x.id===currentTicket);
-  t.msgs.push({from:localStorage.role==="Owner"?"admin":"me",text:txt});
-  localStorage.tickets=JSON.stringify(arr);
-  chatMsg.value="";
-  renderChat();
-}
-
 /* LOGOUT */
 function logout(){
   localStorage.clear();
   location.reload();
 }
 
-window.onload=()=>localStorage.user&&start();
+/* AUTO LOGIN */
+window.onload=()=>{
+  if(localStorage.user){
+    loginPage();
+  }
+};
 </script>
 
 </body>
