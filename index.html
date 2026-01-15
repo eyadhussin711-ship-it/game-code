@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Queen App</title>
+<title>Queen Hotel</title>
 
 <style>
 *{box-sizing:border-box;font-family:Tahoma}
@@ -11,70 +11,73 @@
 body{
   margin:0;
   min-height:100vh;
+  background:linear-gradient(270deg,#000814,#001d3d,#000,#003566);
+  background-size:400% 400%;
+  animation:bg 12s ease infinite;
   color:#fff;
-  background:linear-gradient(270deg,#000,#001a66,#000,#660000);
-  background-size:600% 600%;
-  animation:bgMove 15s infinite;
 }
-@keyframes bgMove{
+
+@keyframes bg{
   0%{background-position:0% 50%}
   50%{background-position:100% 50%}
   100%{background-position:0% 50%}
 }
 
-.wrap{max-width:430px;margin:auto;padding:15px}
+.wrap{max-width:420px;margin:auto;padding:15px}
+
 .box{
   background:rgba(0,0,0,.75);
   padding:20px;
-  border-radius:20px;
-  box-shadow:0 0 25px #000;
+  border-radius:18px;
+  margin-bottom:12px;
 }
 
 h1{
   text-align:center;
-  color:red;
+  font-size:30px;
   animation:glow 2s infinite alternate;
-}
-@keyframes glow{
-  from{text-shadow:0 0 5px red}
-  to{text-shadow:0 0 25px red}
+  color:red;
 }
 
-input,select,textarea,button{
+@keyframes glow{
+  from{text-shadow:0 0 5px red}
+  to{text-shadow:0 0 20px red}
+}
+
+input,button,textarea{
   width:100%;
-  padding:12px;
+  padding:14px;
   margin:6px 0;
   border:none;
   border-radius:12px;
+  font-size:15px;
 }
 
 button{
-  background:#005bff;
+  background:#0d6efd;
   color:#fff;
   font-weight:bold;
   cursor:pointer;
 }
+
+button.red{background:#c1121f}
 
 .nav{
   display:flex;
   gap:5px;
   margin-bottom:10px;
 }
-.nav button{flex:1;font-size:13px}
+
+.nav button{flex:1}
 
 .section{display:none}
 .section.active{display:block}
 
 .item{
-  background:#0b133a;
+  background:#001845;
   padding:12px;
   border-radius:12px;
-  margin:8px 0;
-}
-
-img,video{
-  width:100%;
-  border-radius:12px;
+  margin:6px 0;
 }
 
 .small{font-size:12px;opacity:.8}
@@ -89,14 +92,13 @@ img,video{
     <div class="box">
       <h1>QUEEN</h1>
       <input id="nameInput" placeholder="اسمك">
-      <select id="roleSelect">
-        <option value="client">عميل</option>
-        <option value="cafe">موظف كافيه</option>
-        <option value="hotel">موظف فندق</option>
-        <option value="owner">أونر</option>
-      </select>
-      <input id="codeInput" placeholder="كود (للموظفين)">
+      <input id="codeInput" placeholder="كود الصلاحية (اختياري)">
       <button onclick="login()">دخول</button>
+      <p class="small">
+        كود الكافيه: CAFE-1<br>
+        كود الفندق: HOTEL-1<br>
+        كود الأونر: OWNER-1
+      </p>
     </div>
   </div>
 </div>
@@ -107,73 +109,56 @@ img,video{
 
     <div class="nav">
       <button onclick="show('rooms')">🏨</button>
-      <button onclick="show('cafe')">☕</button>
-      <button onclick="show('events')">🎉</button>
       <button onclick="show('news')">📰</button>
-      <button onclick="show('orders')" id="ordersBtn" style="display:none">📩</button>
-      <button onclick="logout()">🚪</button>
+      <button onclick="show('orders')">🧾</button>
+      <button class="red" onclick="logout()">🚪</button>
     </div>
 
     <!-- ROOMS -->
     <div id="rooms" class="section active">
-      <h3>غرف الفندق</h3>
-      <div id="roomsList"></div>
-    </div>
-
-    <!-- CAFE -->
-    <div id="cafe" class="section">
-      <h3>طلبات الكافيه</h3>
-      <div id="menuList"></div>
-    </div>
-
-    <!-- EVENTS -->
-    <div id="events" class="section">
-      <h3>الحفلات</h3>
-
-      <div id="eventForm" style="display:none">
-        <input type="file" id="eventFile" accept="image/*,video/*">
-        <button onclick="addEvent()">نشر</button>
+      <div class="box">
+        <h3>غرف الفندق</h3>
+        <div id="roomsList"></div>
       </div>
-
-      <div id="eventsList"></div>
     </div>
 
     <!-- NEWS -->
     <div id="news" class="section">
-      <h3>الأخبار</h3>
-      <textarea id="newsText" placeholder="خبر جديد"></textarea>
-      <button onclick="addNews()">نشر</button>
-      <div id="newsList"></div>
+      <div class="box">
+        <h3>الأخبار</h3>
+        <div id="newsList"></div>
+        <div id="newsForm" style="display:none">
+          <textarea id="newsText" placeholder="اكتب خبر"></textarea>
+          <button onclick="addNews()">نشر</button>
+        </div>
+      </div>
     </div>
 
     <!-- ORDERS -->
     <div id="orders" class="section">
-      <h3>الطلبات</h3>
-      <div id="ordersList"></div>
+      <div class="box">
+        <h3>الطلبات</h3>
+        <div id="ordersList"></div>
+      </div>
     </div>
 
   </div>
 </div>
 
 <script>
-const OWNER_CODE="OWNER-QUEEN";
-const HOTEL_CODE="HOTEL-QUEEN";
-const CAFE_CODE="CAFE-QUEEN";
-const DRINKS=["قهوة","شاي","بيبسي","مياه"];
+const CODES = {
+  "CAFE-1":"cafe",
+  "HOTEL-1":"hotel",
+  "OWNER-1":"owner"
+};
 
 function login(){
-  const name=nameInput.value.trim();
-  const role=roleSelect.value;
-  const code=codeInput.value;
+  const name = nameInput.value.trim();
+  if(!name) return alert("اكتب اسمك");
 
-  if(!name)return alert("اكتب اسمك");
-
-  if(role==="owner" && code!==OWNER_CODE)return alert("كود الأونر غلط");
-  if(role==="hotel" && code!==HOTEL_CODE)return alert("كود الفندق غلط");
-  if(role==="cafe" && code!==CAFE_CODE)return alert("كود الكافيه غلط");
-
-  localStorage.user=name;
-  localStorage.role=role;
+  const role = CODES[codeInput.value] || "client";
+  localStorage.setItem("user",name);
+  localStorage.setItem("role",role);
   start();
 }
 
@@ -181,14 +166,13 @@ function start(){
   loginBox.style.display="none";
   app.style.display="block";
 
-  if(localStorage.role!=="client"){
-    ordersBtn.style.display="block";
-  }
-  if(localStorage.role==="owner"){
-    eventForm.style.display="block";
+  if(localStorage.getItem("role")!=="client"){
+    newsForm.style.display="block";
   }
 
-  renderAll();
+  renderRooms();
+  renderOrders();
+  renderNews();
 }
 
 function show(id){
@@ -202,95 +186,57 @@ function renderRooms(){
     roomsList.innerHTML+=`
       <div class="item">
         غرفة ${i}
-        <button onclick="sendOrder('حجز غرفة','غرفة '+${i})">طلب</button>
+        <button onclick="openForm(${i})">طلب</button>
       </div>`;
   }
 }
 
-function renderCafe(){
-  menuList.innerHTML="";
-  DRINKS.forEach(d=>{
-    menuList.innerHTML+=`
-      <div class="item">
-        ${d}
-        <button onclick="sendOrder('مشروب','${d}')">طلب</button>
-      </div>`;
-  });
-}
+function openForm(room){
+  const name = localStorage.getItem("user");
+  const data = prompt("عدد الأشخاص / تاريخ / ملاحظات");
+  if(!data) return;
 
-function sendOrder(type,val){
-  const orders=JSON.parse(localStorage.orders||"[]");
-  orders.push({user:localStorage.user,type,val,time:new Date().toLocaleTimeString()});
-  localStorage.orders=JSON.stringify(orders);
-  alert("تم الإرسال ✔");
+  const orders = JSON.parse(localStorage.getItem("orders")||"[]");
+  orders.push({room,name,data,time:new Date().toLocaleString()});
+  localStorage.setItem("orders",JSON.stringify(orders));
+  alert("تم الإرسال ✅");
 }
 
 function renderOrders(){
   ordersList.innerHTML="";
-  const orders=JSON.parse(localStorage.orders||"[]");
+  const role = localStorage.getItem("role");
+  if(role==="client") return;
+
+  const orders = JSON.parse(localStorage.getItem("orders")||"[]");
   orders.forEach(o=>{
     ordersList.innerHTML+=`
       <div class="item small">
-        ${o.user} | ${o.type} | ${o.val} | ${o.time}
+        ${o.name} | غرفة ${o.room}<br>${o.data}<br>${o.time}
       </div>`;
   });
 }
 
 function addNews(){
-  if(localStorage.role!=="owner")return;
-  if(!newsText.value)return;
-  const news=JSON.parse(localStorage.news||"[]");
-  news.unshift(newsText.value);
-  localStorage.news=JSON.stringify(news);
+  const txt = newsText.value.trim();
+  if(!txt) return;
+  const news = JSON.parse(localStorage.getItem("news")||"[]");
+  news.unshift(txt);
+  localStorage.setItem("news",JSON.stringify(news));
   newsText.value="";
+  renderNews();
 }
 
 function renderNews(){
   newsList.innerHTML="";
-  const news=JSON.parse(localStorage.news||"[]");
+  const news = JSON.parse(localStorage.getItem("news")||"[]");
   news.forEach(n=>{
     newsList.innerHTML+=`<div class="item">${n}</div>`;
   });
 }
 
-function addEvent(){
-  const file=eventFile.files[0];
-  if(!file)return;
-
-  const reader=new FileReader();
-  reader.onload=e=>{
-    const events=JSON.parse(localStorage.events||"[]");
-    events.unshift({type:file.type,data:e.target.result});
-    localStorage.events=JSON.stringify(events);
-    renderEvents();
-  };
-  reader.readAsDataURL(file);
-}
-
-function renderEvents(){
-  eventsList.innerHTML="";
-  const events=JSON.parse(localStorage.events||"[]");
-  events.forEach(ev=>{
-    if(ev.type.startsWith("image")){
-      eventsList.innerHTML+=`<div class="item"><img src="${ev.data}"></div>`;
-    }else{
-      eventsList.innerHTML+=`<div class="item"><video src="${ev.data}" controls></video></div>`;
-    }
-  });
-}
-
-function renderAll(){
-  renderRooms();
-  renderCafe();
+setInterval(()=>{
   renderOrders();
   renderNews();
-  renderEvents();
-}
-
-setInterval(()=>{
-  if(localStorage.role!=="client")renderOrders();
-  renderNews();
-  renderEvents();
 },1000);
 
 function logout(){
@@ -298,7 +244,9 @@ function logout(){
   location.reload();
 }
 
-if(localStorage.user)start();
+window.onload=()=>{
+  if(localStorage.getItem("user")) start();
+}
 </script>
 
 </body>
