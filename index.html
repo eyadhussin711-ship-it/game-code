@@ -3,14 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Queen System</title>
+<title>Queen Hotel</title>
 
 <style>
-*{box-sizing:border-box;font-family:Tahoma}
 body{
   margin:0;
-  min-height:100vh;
-  background:linear-gradient(270deg,#000814,#001d3d,#000814);
+  font-family:Tahoma;
+  background:linear-gradient(270deg,#000,#001a33,#000);
   background-size:400% 400%;
   animation:bg 12s ease infinite;
   color:#fff;
@@ -20,29 +19,42 @@ body{
   50%{background-position:100% 50%}
   100%{background-position:0% 50%}
 }
+
 .wrap{max-width:420px;margin:auto;padding:15px}
-.box{background:rgba(0,0,0,.75);padding:25px;border-radius:18px}
+.box{background:rgba(0,0,0,.85);padding:20px;border-radius:18px}
+
 h1{
   text-align:center;
-  font-size:28px;
-  animation:glow 2s infinite;
   color:red;
+  animation:glow 2s infinite alternate;
 }
 @keyframes glow{
-  0%{text-shadow:0 0 5px red}
-  50%{text-shadow:0 0 20px red}
-  100%{text-shadow:0 0 5px red}
+  from{text-shadow:0 0 5px red}
+  to{text-shadow:0 0 20px red}
 }
-input,select,button,textarea{
-  width:100%;padding:14px;margin:6px 0;
-  border:none;border-radius:12px;font-size:15px;
+
+input,button,textarea{
+  width:100%;
+  padding:12px;
+  margin:6px 0;
+  border:none;
+  border-radius:10px;
+  font-size:14px;
 }
-button{background:#1e90ff;color:#fff;font-weight:bold;cursor:pointer}
+button{background:#0066ff;color:#fff;font-weight:bold;cursor:pointer}
+
+.nav{display:flex;gap:5px;margin-bottom:10px}
+.nav button{flex:1}
+
 .section{display:none}
 .section.active{display:block}
+
 .item{
-  background:#001d3d;
-  padding:12px;border-radius:12px;margin:6px 0
+  background:#002244;
+  padding:12px;
+  border-radius:10px;
+  margin:6px 0;
+  cursor:pointer;
 }
 .small{font-size:12px;opacity:.8}
 </style>
@@ -54,92 +66,160 @@ button{background:#1e90ff;color:#fff;font-weight:bold;cursor:pointer}
 <div id="loginBox">
   <div class="wrap">
     <div class="box">
-      <h1>QUEEN</h1>
+      <h1>QUEEN HOTEL</h1>
       <input id="nameInput" placeholder="اسمك">
-      <select id="roleInput">
-        <option value="client">عميل</option>
-        <option value="cafe">كافيه</option>
-        <option value="hotel">فندق</option>
-        <option value="owner">Owner</option>
-      </select>
+      <input id="codeInput" placeholder="كود الموظف (اختياري)">
       <button onclick="login()">دخول</button>
     </div>
   </div>
 </div>
 
-<!-- CLIENT -->
-<div id="client" class="section wrap">
-  <div class="box">
-    <h3>📝 استمارة حجز</h3>
-    <input placeholder="رقم الهاتف">
-    <input placeholder="البريد الإلكتروني">
-    <input type="date">
-    <input type="date">
-    <input placeholder="عدد البالغين">
-    <input placeholder="عدد الأطفال">
-    <button onclick="alert('تم إرسال الحجز ✅')">إرسال</button>
-    <button onclick="logout()">خروج</button>
-  </div>
-</div>
+<!-- APP -->
+<div id="app" style="display:none">
+  <div class="wrap">
 
-<!-- CAFE -->
-<div id="cafe" class="section wrap">
-  <div class="box">
-    <h3>☕ طلبات الكافيه</h3>
-    <div class="item">غرفة 3 | شاي</div>
-    <div class="item">غرفة 5 | قهوة</div>
-    <button onclick="logout()">خروج</button>
-  </div>
-</div>
+    <div class="nav">
+      <button onclick="show('rooms')">🏨</button>
+      <button onclick="show('news')">📰</button>
+      <button id="ordersBtn" style="display:none" onclick="show('orders')">🧾</button>
+      <button onclick="logout()">🚪</button>
+    </div>
 
-<!-- HOTEL -->
-<div id="hotel" class="section wrap">
-  <div class="box">
-    <h3>🏨 حجوزات الفندق</h3>
-    <div class="item">محمد | 2 بالغين | 1 طفل</div>
-    <div class="item">أحمد | 3 بالغين</div>
-    <button onclick="logout()">خروج</button>
-  </div>
-</div>
+    <!-- ROOMS -->
+    <div id="rooms" class="section active">
+      <h3>الغرف</h3>
+      <div id="roomsList"></div>
+    </div>
 
-<!-- OWNER -->
-<div id="owner" class="section wrap">
-  <div class="box">
-    <h3>👑 لوحة الأونر</h3>
-    <div class="item">📋 كل الحجوزات</div>
-    <div class="item">☕ كل طلبات الكافيه</div>
-    <div class="item">🏨 كل طلبات الفندق</div>
-    <button onclick="logout()">خروج</button>
+    <!-- NEWS -->
+    <div id="news" class="section">
+      <h3>الأخبار</h3>
+      <div id="newsList"></div>
+      <div id="newsForm" style="display:none">
+        <textarea id="newsText" placeholder="خبر جديد"></textarea>
+        <button onclick="addNews()">نشر</button>
+      </div>
+    </div>
+
+    <!-- ORDERS -->
+    <div id="orders" class="section">
+      <h3>الطلبات</h3>
+      <div id="ordersList"></div>
+    </div>
+
   </div>
 </div>
 
 <script>
-const CAFE_CODE="QUEEN-CAFE";
-const HOTEL_CODE="QUEEN-HOTEL";
-const OWNER_CODE="QUEEN-OWNER";
+const CODES = {
+  "QUEEN-HOTEL":"hotel",
+  "QUEEN-CAFE":"cafe",
+  "QUEEN-OWNER":"owner"
+};
 
 function login(){
-  const name=nameInput.value.trim();
-  const role=roleInput.value;
-  if(!name){alert("اكتب الاسم");return;}
+  const name = nameInput.value.trim();
+  if(!name) return alert("اكتب اسمك");
 
-  if(role!=="client"){
-    const code=prompt("اكتب الكود");
-    if(
-      (role==="cafe" && code!==CAFE_CODE)||
-      (role==="hotel"&&code!==HOTEL_CODE)||
-      (role==="owner"&&code!==OWNER_CODE)
-    ){
-      alert("كود غلط");return;
-    }
+  let role = "client";
+  if(codeInput.value && CODES[codeInput.value]){
+    role = CODES[codeInput.value];
   }
 
+  localStorage.setItem("user",name);
+  localStorage.setItem("role",role);
+  start();
+}
+
+function start(){
   loginBox.style.display="none";
-  document.getElementById(role).classList.add("active");
+  app.style.display="block";
+
+  if(localStorage.role!="client"){
+    ordersBtn.style.display="block";
+  }
+  if(localStorage.role=="hotel" || localStorage.role=="owner"){
+    newsForm.style.display="block";
+  }
+  renderAll();
+}
+
+function show(id){
+  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+/* ===== ROOMS ===== */
+function renderRooms(){
+  roomsList.innerHTML="";
+  for(let i=1;i<=12;i++){
+    roomsList.innerHTML+=`
+      <div class="item" onclick="openRoom(${i})">
+        غرفة رقم ${i}
+      </div>`;
+  }
+}
+
+function openRoom(num){
+  const role = localStorage.role;
+  if(role=="client"){
+    const name = prompt("اسم العميل");
+    if(!name) return;
+    saveOrder("حجز غرفة",`غرفة ${num}`,name);
+    alert("تم إرسال طلب الحجز");
+  }else{
+    alert("موظف – لا يمكن الحجز");
+  }
+}
+
+/* ===== ORDERS ===== */
+function saveOrder(type,item,user){
+  const orders = JSON.parse(localStorage.getItem("orders")||"[]");
+  orders.push({type,item,user,time:new Date().toLocaleString()});
+  localStorage.setItem("orders",JSON.stringify(orders));
+  renderOrders();
+}
+
+function renderOrders(){
+  ordersList.innerHTML="";
+  const orders = JSON.parse(localStorage.getItem("orders")||"[]");
+  orders.forEach(o=>{
+    ordersList.innerHTML+=`
+      <div class="item small">
+        ${o.type} | ${o.item} | ${o.user}<br>${o.time}
+      </div>`;
+  });
+}
+
+/* ===== NEWS ===== */
+function addNews(){
+  const txt = newsText.value.trim();
+  if(!txt) return;
+  const news = JSON.parse(localStorage.getItem("news")||"[]");
+  news.unshift(txt);
+  localStorage.setItem("news",JSON.stringify(news));
+  newsText.value="";
+  renderNews();
+}
+function renderNews(){
+  newsList.innerHTML="";
+  const news = JSON.parse(localStorage.getItem("news")||"[]");
+  news.forEach(n=>newsList.innerHTML+=`<div class="item">${n}</div>`);
+}
+
+function renderAll(){
+  renderRooms();
+  renderOrders();
+  renderNews();
 }
 
 function logout(){
+  localStorage.clear();
   location.reload();
+}
+
+window.onload=()=>{
+  if(localStorage.user) start();
 }
 </script>
 
