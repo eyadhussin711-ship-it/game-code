@@ -1,145 +1,169 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-<meta charset="UTF-8">
-<title>Customer Support</title>
+<meta charset="UTF-8" />
+<title>Support System</title>
 <style>
-body{
-    margin:0;
-    font-family:Arial;
-    background:#0b132b;
-    color:white;
-}
-.app{
-    display:flex;
-    height:100vh;
-}
-.sidebar{
-    width:220px;
-    background:#1c2541;
-    padding:15px;
-}
-.sidebar button{
-    width:100%;
-    margin-top:10px;
-    padding:10px;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-}
-.main{
-    flex:1;
-    padding:20px;
-}
-.hidden{display:none;}
-.chat{
-    background:#1c2541;
-    padding:15px;
-    border-radius:10px;
-    height:300px;
-    overflow:auto;
-}
-input,select{
-    width:100%;
-    padding:8px;
-    margin-top:10px;
-}
-.msg{
-    margin:5px 0;
-}
-.client{color:#ffd166;}
-.support{color:#06d6a0;}
+*{box-sizing:border-box;font-family:Arial}
+body{margin:0;background:#0b132b;color:#fff}
+.hidden{display:none}
+.app{display:flex;height:100vh}
+.sidebar{width:230px;background:#1c2541;padding:15px}
+.sidebar h3{margin-top:0}
+.sidebar button{width:100%;margin:6px 0;padding:10px;border:0;border-radius:8px;cursor:pointer}
+.main{flex:1;padding:15px}
+.header{display:flex;justify-content:space-between;align-items:center}
+.list{background:#1c2541;border-radius:10px;padding:10px;margin-top:10px}
+.item{padding:8px;border-bottom:1px solid #2b355a;cursor:pointer}
+.item:last-child{border-bottom:0}
+.chat{background:#1c2541;border-radius:10px;padding:10px;height:55vh;overflow:auto}
+.msg{margin:6px 0}
+.me{color:#ffd166}
+.sup{color:#06d6a0}
+input,select{width:100%;padding:8px;margin:6px 0;border-radius:6px;border:0}
+.send{display:flex;gap:6px}
+.send input{flex:1}
+.send button{padding:8px 12px;border:0;border-radius:6px;cursor:pointer}
+.login{max-width:320px;margin:80px auto;background:#1c2541;padding:20px;border-radius:12px;text-align:center}
+.badge{background:#ffd166;color:#000;padding:2px 8px;border-radius:12px}
 </style>
 </head>
-
 <body>
 
-<div id="login">
-    <h2>تسجيل الدخول</h2>
-    <input id="name" placeholder="اسمك">
-    <button onclick="login()">دخول كعميل</button>
-    <hr>
-    <input id="supportCode" placeholder="كود فريق الدعم">
-    <button onclick="loginSupport()">دخول كدعم</button>
+<!-- LOGIN -->
+<div class="login" id="login">
+  <h2>تسجيل الدخول</h2>
+  <input id="name" placeholder="اسمك">
+  <button onclick="loginClient()">دخول كعميل</button>
+  <hr>
+  <input id="scode" placeholder="كلمة سر الدعم">
+  <button onclick="loginSupport()">دخول كدعم</button>
 </div>
 
+<!-- APP -->
 <div class="app hidden" id="app">
-    <div class="sidebar">
-        <h3 id="userRole"></h3>
-        <button onclick="openComplaint()">🧾 فتح شكوى</button>
-        <button onclick="logout()">🚪 تسجيل خروج</button>
+  <div class="sidebar">
+    <h3 id="roleTitle"></h3>
+    <button onclick="show('store')">🛒 المتجر</button>
+    <button onclick="show('orders')">📦 مشترياتي</button>
+    <button onclick="show('complaints')">🧾 الشكاوي</button>
+    <button onclick="show('support')" id="supportBtn">🧑‍💼 الدعم</button>
+    <button onclick="logout()">🚪 خروج</button>
+  </div>
+
+  <div class="main">
+    <div class="header">
+      <div>👋 أهلاً <b id="uname"></b></div>
+      <span class="badge" id="badge"></span>
     </div>
 
-    <div class="main">
-        <div id="complaintBox" class="hidden">
-            <select id="type">
-                <option>تأخير طلب</option>
-                <option>استفسار</option>
-                <option>مشكلة عامة</option>
-            </select>
-            <input id="text" placeholder="اكتب الشكوى">
-            <button onclick="send()">إرسال</button>
-        </div>
-
-        <div class="chat" id="chat"></div>
+    <!-- STORE -->
+    <div id="store" class="list">
+      <div class="item">60 UC</div>
+      <div class="item">300 UC</div>
     </div>
+
+    <!-- ORDERS -->
+    <div id="orders" class="list hidden">
+      لا توجد مشتريات (تجريبي)
+    </div>
+
+    <!-- COMPLAINTS -->
+    <div id="complaints" class="hidden">
+      <button onclick="newComplaint()">➕ فتح شكوى</button>
+      <div class="list" id="myComplaints"></div>
+    </div>
+
+    <!-- SUPPORT PANEL -->
+    <div id="support" class="hidden">
+      <h3>كل الشكاوي</h3>
+      <div class="list" id="allComplaints"></div>
+    </div>
+
+    <!-- CHAT -->
+    <div id="chatBox" class="hidden">
+      <h3 id="chatTitle"></h3>
+      <div class="chat" id="chat"></div>
+      <div class="send">
+        <input id="msg" placeholder="اكتب رسالة">
+        <button onclick="sendMsg()">إرسال</button>
+      </div>
+    </div>
+
+  </div>
 </div>
 
 <script>
-let user="",role="client";
+const SUPPORT_CODE="SUPPORT123";
+let user="", role="client", currentRoom=null;
 
-function login(){
-    user=document.getElementById("name").value;
-    if(!user)return;
-    role="client";
-    start();
+function loginClient(){
+  user=document.getElementById('name').value.trim();
+  if(!user) return alert("اكتب اسمك");
+  role="client"; start();
 }
-
 function loginSupport(){
-    let code=document.getElementById("supportCode").value;
-    if(code==="SUPPORT123"){
-        user="الدعم";
-        role="support";
-        start();
-    }else alert("كود غلط");
+  if(document.getElementById('scode').value!==SUPPORT_CODE) return alert("كلمة سر غلط");
+  user="الدعم"; role="support"; start();
 }
-
 function start(){
-    document.getElementById("login").classList.add("hidden");
-    document.getElementById("app").classList.remove("hidden");
-    document.getElementById("userRole").innerText= role==="support"?"🧑‍💼 دعم":"👤 عميل";
-    loadChat();
+  document.getElementById('login').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  document.getElementById('uname').innerText=user;
+  document.getElementById('badge').innerText= role==="support"?"SUPPORT":"CLIENT";
+  document.getElementById('roleTitle').innerText= role==="support"?"🧑‍💼 دعم":"👤 عميل";
+  document.getElementById('supportBtn').style.display= role==="support"?"block":"none";
+  show('store'); refreshLists(); setInterval(refreshChat,5000);
+}
+function logout(){ location.reload(); }
+
+function show(id){
+  ['store','orders','complaints','support','chatBox'].forEach(x=>document.getElementById(x).classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
 }
 
-function openComplaint(){
-    document.getElementById("complaintBox").classList.remove("hidden");
-}
+function data(){ return JSON.parse(localStorage.getItem('complaints')||'[]'); }
+function save(d){ localStorage.setItem('complaints',JSON.stringify(d)); }
 
-function send(){
-    let msg=document.getElementById("text").value;
-    if(!msg)return;
-    let chat=JSON.parse(localStorage.getItem("chat")||"[]");
-    chat.push({user,role,msg});
-    localStorage.setItem("chat",JSON.stringify(chat));
-    document.getElementById("text").value="";
-    loadChat();
+function newComplaint(){
+  const type=prompt("نوع الشكوى:\n1 تأخير\n2 استفسار\n3 مشكلة");
+  if(!type) return;
+  const d=data();
+  const id='c'+Date.now();
+  d.push({id,owner:user,type,chat:[]});
+  save(d); refreshLists(); openRoom(id);
 }
-
-function loadChat(){
-    let chat=JSON.parse(localStorage.getItem("chat")||"[]");
-    let box=document.getElementById("chat");
-    box.innerHTML="";
-    chat.forEach(c=>{
-        if(role==="support"||c.user===user){
-            box.innerHTML+=`<div class="msg ${c.role}">${c.user}: ${c.msg}</div>`;
-        }
-    });
+function refreshLists(){
+  const d=data();
+  // my
+  const my=d.filter(x=>x.owner===user);
+  document.getElementById('myComplaints').innerHTML=my.map(x=>`<div class="item" onclick="openRoom('${x.id}')">${x.id}</div>`).join('')||'لا يوجد';
+  // all
+  if(role==="support"){
+    document.getElementById('allComplaints').innerHTML=d.map(x=>`<div class="item" onclick="openRoom('${x.id}')">${x.id} - ${x.owner}</div>`).join('')||'لا يوجد';
+  }
 }
-
-function logout(){
-    location.reload();
+function openRoom(id){
+  currentRoom=id; show('chatBox');
+  document.getElementById('chatTitle').innerText="غرفة "+id;
+  refreshChat();
+}
+function sendMsg(){
+  if(!currentRoom) return;
+  const txt=document.getElementById('msg').value.trim();
+  if(!txt) return;
+  const d=data(); const r=d.find(x=>x.id===currentRoom);
+  r.chat.push({from:role,text:txt,time:Date.now()});
+  save(d); document.getElementById('msg').value=""; refreshChat();
+}
+function refreshChat(){
+  if(!currentRoom) return;
+  const d=data(); const r=d.find(x=>x.id===currentRoom);
+  if(!r) return;
+  const box=document.getElementById('chat');
+  box.innerHTML=r.chat.map(m=>`<div class="msg ${m.from==='support'?'sup':'me'}">${m.from==='support'?'الدعم':'العميل'}: ${m.text}</div>`).join('');
+  box.scrollTop=box.scrollHeight;
 }
 </script>
-
 </body>
 </html>
