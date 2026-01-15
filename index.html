@@ -2,101 +2,246 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Queen Hotel</title>
 
 <style>
+*{box-sizing:border-box;font-family:Tahoma}
+
+/* 🔥 خلفية متحركة */
 body{
-  margin:0;height:100vh;
+  margin:0;
+  min-height:100vh;
+  background:linear-gradient(270deg,#000,#1a0000,#000,#330000);
+  background-size:600% 600%;
+  animation:bgMove 12s ease infinite;
+  color:#fff;
+}
+@keyframes bgMove{
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+
+/* 📱 موبايل أولًا */
+.container{
+  max-width:420px;
+  margin:auto;
+  padding:15px;
+}
+
+/* LOGIN */
+#login{
   display:flex;
   justify-content:center;
   align-items:center;
-  background:#000;
-  color:#fff;
-  font-family:Tahoma;
+  min-height:100vh;
 }
 .box{
-  background:#1a0000;
-  padding:30px;
-  border-radius:15px;
-  width:340px;
+  width:100%;
+  background:rgba(0,0,0,.7);
+  padding:25px;
+  border-radius:16px;
   text-align:center;
 }
 h1{
   color:red;
+  margin-bottom:10px;
 }
 input,button{
   width:100%;
-  padding:12px;
+  padding:14px;
   margin:8px 0;
   border:none;
-  border-radius:10px;
+  border-radius:12px;
+  font-size:16px;
 }
 button{
   background:red;
   color:white;
   font-weight:bold;
-  cursor:pointer;
 }
+
+/* APP */
 #app{display:none}
+.nav{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:10px;
+}
+.nav button{
+  flex:1;
+  margin:3px;
+}
+
+/* SECTIONS */
+.section{display:none}
+.section.active{display:block}
+
+/* ITEMS */
+.item{
+  background:#1f0000;
+  padding:12px;
+  margin:6px 0;
+  border-radius:12px;
+  font-size:15px;
+}
+.small{
+  font-size:12px;
+  opacity:.8;
+}
 </style>
 </head>
 
 <body>
 
-<div id="login" class="box">
-  <h1>QUEEN HOTEL</h1>
-  <p>🚫 ممنوع الكتابة – اكتب الاسم فقط</p>
-  <input id="username" placeholder="اسمك">
-  <input id="secret" placeholder="الكود السري (للموظفين)">
-  <button onclick="login()">دخول</button>
+<!-- LOGIN -->
+<div id="login">
+  <div class="container">
+    <div class="box">
+      <h1>QUEEN HOTEL</h1>
+      <p class="small">🚫 ممنوع الكتابة هنا – اكتب الاسم فقط</p>
+      <input id="username" placeholder="اسمك">
+      <input id="secret" placeholder="كود الموظف (اختياري)">
+      <button onclick="login()">دخول</button>
+    </div>
+  </div>
 </div>
 
-<div id="app" class="box">
-  <h2>تم الدخول ✅</h2>
-  <p id="info"></p>
-  <button onclick="logout()">خروج</button>
+<!-- APP -->
+<div id="app">
+  <div class="container">
+
+    <div class="nav">
+      <button onclick="openSec('hotel')">🏨</button>
+      <button onclick="openSec('cafe')">☕</button>
+      <button id="staffBtn" style="display:none" onclick="openSec('orders')">🧾</button>
+      <button onclick="logout()">🚪</button>
+    </div>
+
+    <!-- HOTEL -->
+    <div id="hotel" class="section active">
+      <h3>🏨 غرف الفندق</h3>
+      <div id="rooms"></div>
+    </div>
+
+    <!-- CAFE -->
+    <div id="cafe" class="section">
+      <h3>☕ الكافيه</h3>
+      <div id="menu"></div>
+    </div>
+
+    <!-- ORDERS -->
+    <div id="orders" class="section">
+      <h3>🧾 الطلبات</h3>
+      <div id="orderList"></div>
+    </div>
+
+  </div>
 </div>
 
 <script>
-const OWNER_CODE = "QUEEN-OWNER";
-const STAFF_CODE = "QUEEN-STAFF";
+/* 🔐 أكواد */
+const STAFF_CODE="QUEEN-STAFF";
 
+/* بيانات */
+let menu = JSON.parse(localStorage.menu||'["شاي","قهوة","بيبسي","مياه"]');
+let orders = JSON.parse(localStorage.orders||"[]");
+
+/* LOGIN */
 function login(){
-  let u = document.getElementById("username").value.trim();
-  let s = document.getElementById("secret").value.trim();
+  let u=username.value.trim();
+  if(!u){ alert("اكتب اسمك"); return; }
 
-  if(!u){
-    alert("اكتب اسمك");
-    return;
+  let role = (secret.value===STAFF_CODE)?"staff":"guest";
+  localStorage.user=u;
+  localStorage.role=role;
+
+  start();
+}
+
+/* START */
+function start(){
+  login.style.display="none";
+  app.style.display="block";
+
+  if(localStorage.role==="staff"){
+    staffBtn.style.display="block";
   }
 
-  let role = "guest";
-  if(s === OWNER_CODE) role = "owner";
-  else if(s === STAFF_CODE) role = "staff";
-
-  localStorage.setItem("user", u);
-  localStorage.setItem("role", role);
-
-  show();
+  renderAll();
 }
 
-function show(){
-  document.getElementById("login").style.display="none";
-  document.getElementById("app").style.display="block";
-  document.getElementById("info").innerText =
-    "أهلاً " + localStorage.getItem("user") +
-    " | الدور: " + localStorage.getItem("role");
+/* RENDER */
+function renderAll(){
+  renderRooms();
+  renderMenu();
+  renderOrders();
 }
 
+/* ROOMS */
+function renderRooms(){
+  rooms.innerHTML="";
+  for(let i=1;i<=12;i++){
+    rooms.innerHTML+=`<div class="item">غرفة رقم ${i}</div>`;
+  }
+}
+
+/* MENU */
+function renderMenu(){
+  menuDiv=document.getElementById("menu");
+  menuDiv.innerHTML="";
+  menu.forEach(d=>{
+    menuDiv.innerHTML+=`
+      <div class="item">
+        ${d}
+        <button onclick="order('${d}')">طلب</button>
+      </div>`;
+  });
+}
+
+/* ORDER */
+function order(item){
+  let room=prompt("اختر رقم الغرفة (1-12)");
+  if(!room||room<1||room>12) return alert("رقم غير صحيح");
+
+  orders.push({user:localStorage.user,room,item});
+  localStorage.orders=JSON.stringify(orders);
+  alert("تم إرسال الطلب");
+}
+
+/* ORDERS */
+function renderOrders(){
+  orderList.innerHTML="";
+  orders.forEach(o=>{
+    orderList.innerHTML+=`
+      <div class="item small">
+        ${o.user} | غرفة ${o.room} | ${o.item}
+      </div>`;
+  });
+}
+
+/* NAV */
+function openSec(id){
+  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+/* LOGOUT */
 function logout(){
   localStorage.clear();
   location.reload();
 }
 
-window.onload = function(){
-  if(localStorage.getItem("user")){
-    show();
-  }
+/* 🔄 تحديث تلقائي كل 5 ثواني */
+setInterval(()=>{
+  orders = JSON.parse(localStorage.orders||"[]");
+  renderOrders();
+},5000);
+
+/* AUTO */
+window.onload=()=>{
+  if(localStorage.user) start();
 };
 </script>
 
