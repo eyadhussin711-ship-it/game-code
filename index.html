@@ -5,233 +5,78 @@
 <title>EYAD STORE</title>
 
 <style>
-*{box-sizing:border-box;font-family:Arial}
 body{
-  margin:0;height:100vh;
-  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-  color:#fff;
+  margin:0;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:#203a43;
+  font-family:Arial;
+  color:white;
 }
-.hidden{display:none}
-
-/* LOGIN */
-#login{
-  height:100vh;display:flex;
-  justify-content:center;align-items:center;
+.box{
+  background:#102a36;
+  padding:30px;
+  border-radius:15px;
+  width:300px;
+  text-align:center;
 }
-.login-box{
-  width:360px;background:#102a36;
-  padding:25px;border-radius:16px;text-align:center;
-}
-.title{
-  font-size:32px;font-weight:bold;margin-bottom:15px;
-  background:linear-gradient(270deg,#ffd700,#ffb703,#fff,#ffd700);
-  background-size:600% 600%;
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  animation:gold 4s ease infinite;
-}
-@keyframes gold{
-  0%{background-position:0% 50%}
-  50%{background-position:100% 50%}
-  100%{background-position:0% 50%}
-}
-.login-box input,.login-box button{
-  width:100%;padding:12px;margin:8px 0;
-  border:none;border-radius:10px;
-}
-.login-box button{background:#00f5ff;font-weight:bold;cursor:pointer}
-
-/* APP */
-#app{display:none;height:100vh}
-.app{display:flex;height:100%}
-
-/* SIDEBAR */
-.sidebar{
-  width:220px;background:#102a36;padding:15px;
-}
-.sidebar button{
-  width:100%;margin:6px 0;padding:10px;
-  border:none;border-radius:10px;
-  background:#00f5ff;font-weight:bold;cursor:pointer;
-}
-
-/* CONTENT */
-.content{flex:1;padding:20px}
-.section{display:none}
-.section.active{display:block}
-
-/* LIST */
-.item{
-  background:#1f3b4d;
-  padding:10px;margin:6px 0;
+input,button{
+  width:100%;
+  padding:12px;
+  margin:8px 0;
+  border:none;
   border-radius:10px;
 }
-
-/* FOOTER */
-.footer{
-  position:fixed;bottom:6px;right:10px;
-  font-size:12px;opacity:.7;
+button{
+  background:#00f5ff;
+  font-weight:bold;
+  cursor:pointer;
 }
+#app{display:none}
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
-<div id="login">
-  <div class="login-box">
-    <div class="title">EYAD STORE</div>
-    <input id="username" placeholder="اسمك">
-    <input id="code" placeholder="كود الأونر (اختياري)">
-    <button onclick="login()">دخول</button>
-    <small>Developer: Eyad Abo Gad</small>
-  </div>
+<div id="login" class="box">
+  <h2>EYAD STORE</h2>
+  <input id="name" placeholder="اسمك">
+  <button onclick="enter()">دخول</button>
 </div>
 
-<!-- APP -->
-<div id="app">
-<div class="app">
-
-<div class="sidebar">
-  <button onclick="openSec('store')">🛒 المتجر</button>
-  <button onclick="openSec('tickets')">🧾 الشكاوي</button>
-  <button id="adminBtn" class="hidden" onclick="openSec('admin')">👑 الإدارة</button>
-  <button onclick="logout()">🚪 خروج</button>
+<div id="app" class="box">
+  <h2>أهلاً <span id="user"></span></h2>
+  <p>دخلت الموقع بنجاح ✅</p>
+  <button onclick="logout()">خروج</button>
 </div>
-
-<div class="content">
-
-<!-- STORE -->
-<div id="store" class="section">
-  <h2 id="welcome"></h2>
-  <div id="products"></div>
-</div>
-
-<!-- TICKETS -->
-<div id="tickets" class="section">
-  <h3>📩 الشكاوي</h3>
-  <input id="ticketText" placeholder="اكتب الشكوى">
-  <button onclick="sendTicket()">إرسال</button>
-  <div id="ticketList"></div>
-</div>
-
-<!-- ADMIN -->
-<div id="admin" class="section">
-  <h3>👥 المستخدمين</h3>
-  <div id="usersList"></div>
-
-  <h3>📨 كل الشكاوي</h3>
-  <div id="allTickets"></div>
-</div>
-
-</div>
-</div>
-</div>
-
-<div class="footer">© Eyad Abo Gad</div>
 
 <script>
-const OWNER_CODE="OWNER-999";
+function enter(){
+  let n = name.value.trim();
+  if(!n){ alert("اكتب اسمك"); return; }
 
-/* HELPERS */
-const get = k => JSON.parse(localStorage[k]||"[]");
-const set = (k,v) => localStorage[k]=JSON.stringify(v);
-
-/* LOGIN */
-function login(){
-  let u=username.value.trim();
-  if(!u) return alert("اكتب اسمك");
-
-  let role = (code.value===OWNER_CODE || u==="Eyad")?"Owner":"Player";
-
-  let users=get("users");
-  if(!users.find(x=>x.name===u)){
-    users.push({name:u,role});
-    set("users",users);
-  }
-
-  localStorage.user=u;
-  localStorage.role=role;
-  start();
+  localStorage.setItem("user", n);
+  show();
 }
 
-/* START */
-function start(){
+function show(){
   login.style.display="none";
   app.style.display="block";
-  welcome.innerText="أهلاً "+localStorage.user;
-
-  if(localStorage.role==="Owner"){
-    adminBtn.classList.remove("hidden");
-  }
-
-  renderProducts();
-  renderTickets();
-  renderUsers();
-  openSec("store");
+  user.innerText = localStorage.getItem("user");
 }
 
-/* PRODUCTS */
-function renderProducts(){
-  products.innerHTML="";
-  get("products").forEach(p=>{
-    products.innerHTML+=`<div class="item">${p}</div>`;
-  });
-}
-
-/* TICKETS */
-function sendTicket(){
-  let t=ticketText.value.trim();
-  if(!t) return;
-  let arr=get("tickets");
-  arr.push({user:localStorage.user,text:t});
-  set("tickets",arr);
-  ticketText.value="";
-  renderTickets();
-}
-function renderTickets(){
-  ticketList.innerHTML="";
-  get("tickets").filter(t=>t.user===localStorage.user)
-    .forEach(t=>{
-      ticketList.innerHTML+=`<div class="item">${t.text}</div>`;
-    });
-
-  allTickets.innerHTML="";
-  if(localStorage.role==="Owner"){
-    get("tickets").forEach(t=>{
-      allTickets.innerHTML+=`<div class="item"><b>${t.user}:</b> ${t.text}</div>`;
-    });
-  }
-}
-
-/* USERS */
-function renderUsers(){
-  if(localStorage.role!=="Owner") return;
-  usersList.innerHTML="";
-  get("users").forEach(u=>{
-    usersList.innerHTML+=`<div class="item">${u.name} - ${u.role}</div>`;
-  });
-}
-
-/* NAV */
-function openSec(id){
-  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-}
-
-/* LOGOUT */
 function logout(){
-  localStorage.removeItem("user");
-  localStorage.removeItem("role");
+  localStorage.clear();
   location.reload();
 }
 
-/* AUTO */
-window.onload=()=>{
-  if(localStorage.user && localStorage.role){
-    start();
+window.onload = ()=>{
+  if(localStorage.getItem("user")){
+    show();
   }
-};
+}
 </script>
 
 </body>
