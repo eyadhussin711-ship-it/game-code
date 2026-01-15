@@ -2,7 +2,7 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>UC Store</title>
+<title>UC Store System</title>
 
 <style>
 *{box-sizing:border-box;font-family:Arial}
@@ -11,8 +11,9 @@ body{
   background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
   color:#fff;
 }
+.hidden{display:none}
 
-/* ===== Login ===== */
+/* LOGIN */
 #login{
   height:100vh;
   display:flex;
@@ -43,28 +44,67 @@ body{
   cursor:pointer;
 }
 
-/* ===== App ===== */
-#app{
-  display:none; /* مهم */
-  height:100vh;
+/* APP */
+#app{display:none;height:100vh}
+.header{padding:10px;background:rgba(0,0,0,.3)}
+.main{display:flex;height:calc(100vh - 50px)}
+.sidebar{
+  width:220px;
+  background:rgba(0,0,0,.4);
+  padding:10px;
+}
+.sidebar button{
+  width:100%;
+  padding:10px;
+  margin:6px 0;
+  border:none;
+  border-radius:12px;
+  background:rgba(255,255,255,.15);
+  color:#fff;
+  cursor:pointer;
+}
+.sidebar button.active{
+  background:#00f5ff;
+  color:#000;
 }
 
-/* Sections */
-.section{
-  display:none;
-  padding:20px;
-}
-.section.active{
-  display:block;
-}
+.content{flex:1;padding:15px}
 
-/* Owner */
-.owner-box{
+/* STORE */
+.card{
   background:rgba(255,255,255,.15);
   padding:15px;
   border-radius:12px;
-  margin-top:20px;
+  margin:10px 0;
 }
+.buy{
+  margin-top:10px;
+  padding:10px;
+  width:100%;
+  border:none;
+  border-radius:20px;
+  background:#ffd166;
+  cursor:pointer;
+}
+
+/* USERS */
+.user{
+  padding:6px;
+  cursor:pointer;
+}
+.user:hover{background:rgba(255,255,255,.15)}
+
+/* CHAT */
+.chat{
+  background:rgba(0,0,0,.4);
+  padding:10px;
+  height:250px;
+  overflow:auto;
+  border-radius:10px;
+}
+.msg{margin:5px 0}
+.me{color:#00f5ff}
+.admin{color:#ffd166}
 </style>
 </head>
 
@@ -82,80 +122,190 @@ body{
 
 <!-- APP -->
 <div id="app">
-  <h2>أهلاً <span id="userName"></span></h2>
-
-  <!-- STORE -->
-  <div id="store" class="section active">
-    <h3>🛒 المتجر</h3>
-    <p>60 UC</p>
-    <p>300 UC</p>
-    <p>600 UC</p>
+  <div class="header">
+    أهلاً <span id="userName"></span>
   </div>
 
-  <!-- OWNER PANEL -->
-  <div id="ownerPanel" class="section">
-    <div class="owner-box">
-      <h3>👑 لوحة الأونر</h3>
-      <p>دي بتظهر للأونر بس</p>
-      <button>توظيف</button>
-      <button>ترقية</button>
-      <button>فصل</button>
+  <div class="main">
+    <div class="sidebar">
+      <button class="nav active" onclick="openSec('store',this)">🛒 المتجر</button>
+      <button class="nav" onclick="openSec('tickets',this)">🧾 الشكاوي</button>
+      <button class="nav hidden" id="ownerBtn" onclick="openSec('owner',this)">👑 الإدارة</button>
+      <button onclick="logout()">🚪 خروج</button>
+    </div>
+
+    <div class="content">
+
+      <!-- STORE -->
+      <div id="store" class="section">
+        <div class="card">60 UC<button class="buy">شراء</button></div>
+        <div class="card">300 UC<button class="buy">شراء</button></div>
+        <div class="card">600 UC<button class="buy">شراء</button></div>
+      </div>
+
+      <!-- TICKETS -->
+      <div id="tickets" class="section hidden">
+        <input id="ticketText" placeholder="اكتب الشكوى">
+        <button onclick="newTicket()">فتح شكوى</button>
+        <div id="myTickets"></div>
+      </div>
+
+      <!-- OWNER -->
+      <div id="owner" class="section hidden">
+        <h3>👥 الأشخاص</h3>
+        <div id="usersList"></div>
+
+        <div id="actions" class="hidden">
+          <p id="selUser"></p>
+          <button onclick="setRole('Admin')">توظيف</button>
+          <button onclick="setRole('Mod')">ترقية</button>
+          <button onclick="fire()">فصل</button>
+          <button onclick="ban()">حظر</button>
+        </div>
+
+        <hr>
+        <h3>🧾 كل الشكاوي</h3>
+        <div id="allTickets"></div>
+      </div>
+
+      <!-- CHAT -->
+      <div id="chatBox" class="section hidden">
+        <h3>روم الشكوى</h3>
+        <div class="chat" id="chat"></div>
+        <input id="chatMsg" placeholder="اكتب رسالة">
+        <button onclick="sendMsg()">إرسال</button>
+      </div>
+
     </div>
   </div>
-
-  <button onclick="logout()">🚪 خروج</button>
 </div>
 
 <script>
-const OWNER_CODE = "OWNER-999";
+const OWNER_CODE="OWNER-999";
+let currentTicket=null;
+let selectedUser=null;
 
+/* LOGIN */
 function login(){
-  const user = document.getElementById("username").value.trim();
-  const code = document.getElementById("code").value.trim();
+  let u=username.value.trim();
+  if(!u)return alert("اكتب اسمك");
+  let role=(code.value===OWNER_CODE)?"Owner":"Player";
 
-  if(user === ""){
-    alert("اكتب اسمك");
-    return;
+  let users=JSON.parse(localStorage.users||"[]");
+  if(!users.find(x=>x.name===u)){
+    users.push({name:u,role,banned:false});
+    localStorage.users=JSON.stringify(users);
   }
 
-  // تحديد الرتبة
-  let role = "Player";
-  if(code === OWNER_CODE){
-    role = "Owner";
-  }
+  let me=users.find(x=>x.name===u);
+  if(me.banned)return alert("أنت محظور");
 
-  // حفظ
-  localStorage.setItem("user", user);
-  localStorage.setItem("role", role);
-
-  startApp();
+  localStorage.user=u;
+  localStorage.role=me.role;
+  start();
 }
 
-function startApp(){
-  // إخفاء تسجيل الدخول نهائي
-  document.getElementById("login").style.display = "none";
-
-  // إظهار التطبيق
-  document.getElementById("app").style.display = "block";
-  document.getElementById("userName").innerText = localStorage.getItem("user");
-
-  // إظهار فورم الأونر لو أونر
-  if(localStorage.getItem("role") === "Owner"){
-    document.getElementById("ownerPanel").classList.add("active");
+function start(){
+  login.style.display="none";
+  app.style.display="block";
+  userName.innerText=localStorage.user;
+  if(localStorage.role==="Owner"){
+    ownerBtn.classList.remove("hidden");
+    loadUsers();
+    loadAllTickets();
   }
 }
 
+/* NAV */
+function openSec(id,btn){
+  document.querySelectorAll(".section").forEach(s=>s.classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
+  document.querySelectorAll(".nav").forEach(b=>b.classList.remove("active"));
+  if(btn)btn.classList.add("active");
+}
+
+/* USERS */
+function loadUsers(){
+  let users=JSON.parse(localStorage.users||"[]");
+  usersList.innerHTML="";
+  users.forEach(u=>{
+    usersList.innerHTML+=`<div class="user" onclick="selectUser('${u.name}')">${u.name} (${u.role})</div>`;
+  });
+}
+function selectUser(n){
+  selectedUser=n;
+  selUser.innerText="المحدد: "+n;
+  actions.classList.remove("hidden");
+}
+function setRole(r){
+  update(u=>u.role=r);
+}
+function fire(){
+  let users=JSON.parse(localStorage.users);
+  users=users.filter(u=>u.name!==selectedUser);
+  localStorage.users=JSON.stringify(users);
+  loadUsers();
+}
+function ban(){
+  update(u=>u.banned=true);
+}
+function update(fn){
+  let users=JSON.parse(localStorage.users);
+  users.forEach(u=>{if(u.name===selectedUser)fn(u)});
+  localStorage.users=JSON.stringify(users);
+  loadUsers();
+}
+
+/* TICKETS */
+function newTicket(){
+  let t=ticketText.value.trim();
+  if(!t)return;
+  let arr=JSON.parse(localStorage.tickets||"[]");
+  arr.push({id:Date.now(),user:localStorage.user,msgs:[{from:"me",text:t}]});
+  localStorage.tickets=JSON.stringify(arr);
+  ticketText.value="";
+  loadMyTickets();
+}
+function loadMyTickets(){
+  let arr=JSON.parse(localStorage.tickets||"[]");
+  myTickets.innerHTML="";
+  arr.filter(t=>t.user===localStorage.user)
+     .forEach(t=>myTickets.innerHTML+=`<div onclick="openChat(${t.id})">شكوى #${t.id}</div>`);
+}
+function loadAllTickets(){
+  let arr=JSON.parse(localStorage.tickets||"[]");
+  allTickets.innerHTML="";
+  arr.forEach(t=>allTickets.innerHTML+=`<div onclick="openChat(${t.id})">${t.user} - #${t.id}</div>`);
+}
+function openChat(id){
+  currentTicket=id;
+  openSec("chatBox");
+  renderChat();
+}
+function renderChat(){
+  let arr=JSON.parse(localStorage.tickets);
+  let t=arr.find(x=>x.id===currentTicket);
+  chat.innerHTML="";
+  t.msgs.forEach(m=>chat.innerHTML+=`<div class="msg ${m.from}">${m.text}</div>`);
+}
+function sendMsg(){
+  let txt=chatMsg.value.trim();
+  if(!txt)return;
+  let arr=JSON.parse(localStorage.tickets);
+  let t=arr.find(x=>x.id===currentTicket);
+  t.msgs.push({from:localStorage.role==="Owner"?"admin":"me",text:txt});
+  localStorage.tickets=JSON.stringify(arr);
+  chatMsg.value="";
+  renderChat();
+}
+
+/* LOGOUT */
 function logout(){
   localStorage.clear();
   location.reload();
 }
 
-// دخول تلقائي
-window.onload = function(){
-  if(localStorage.getItem("user")){
-    startApp();
-  }
-}
+window.onload=()=>localStorage.user&&start();
 </script>
 
 </body>
