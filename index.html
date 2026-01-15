@@ -3,15 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Queen Hotel</title>
+<title>Queen System</title>
 
 <style>
 *{box-sizing:border-box;font-family:Tahoma}
-
 body{
   margin:0;
   min-height:100vh;
-  background:linear-gradient(270deg,#020024,#020024,#001f3f,#020024);
+  background:linear-gradient(270deg,#000814,#001d3d,#000814);
   background-size:400% 400%;
   animation:bg 12s ease infinite;
   color:#fff;
@@ -21,48 +20,29 @@ body{
   50%{background-position:100% 50%}
   100%{background-position:0% 50%}
 }
-
 .wrap{max-width:420px;margin:auto;padding:15px}
-.box{
-  background:rgba(0,0,0,.8);
-  padding:25px;
-  border-radius:18px
-}
-
+.box{background:rgba(0,0,0,.75);padding:25px;border-radius:18px}
 h1{
   text-align:center;
+  font-size:28px;
+  animation:glow 2s infinite;
   color:red;
-  animation:glow 2s infinite alternate;
 }
 @keyframes glow{
-  from{text-shadow:0 0 5px red}
-  to{text-shadow:0 0 20px red}
+  0%{text-shadow:0 0 5px red}
+  50%{text-shadow:0 0 20px red}
+  100%{text-shadow:0 0 5px red}
 }
-
-input,button,textarea{
-  width:100%;
-  padding:14px;
-  margin:6px 0;
-  border:none;
-  border-radius:12px;
-  font-size:15px;
+input,select,button,textarea{
+  width:100%;padding:14px;margin:6px 0;
+  border:none;border-radius:12px;font-size:15px;
 }
-button{
-  background:#0066ff;
-  color:#fff;
-  font-weight:bold;
-  cursor:pointer;
-}
-button.red{background:red}
-
+button{background:#1e90ff;color:#fff;font-weight:bold;cursor:pointer}
 .section{display:none}
 .section.active{display:block}
-
 .item{
-  background:#001933;
-  padding:12px;
-  border-radius:12px;
-  margin:6px 0
+  background:#001d3d;
+  padding:12px;border-radius:12px;margin:6px 0
 }
 .small{font-size:12px;opacity:.8}
 </style>
@@ -75,101 +55,90 @@ button.red{background:red}
   <div class="wrap">
     <div class="box">
       <h1>QUEEN</h1>
-      <p class="small">ادخل اسمك</p>
       <input id="nameInput" placeholder="اسمك">
+      <select id="roleInput">
+        <option value="client">عميل</option>
+        <option value="cafe">كافيه</option>
+        <option value="hotel">فندق</option>
+        <option value="owner">Owner</option>
+      </select>
       <button onclick="login()">دخول</button>
-      <hr>
-      <button class="red" onclick="staffLogin()">تحول كموظف فندق</button>
     </div>
   </div>
 </div>
 
-<!-- APP -->
-<div id="app" style="display:none">
-  <div class="wrap">
-    <div class="box">
+<!-- CLIENT -->
+<div id="client" class="section wrap">
+  <div class="box">
+    <h3>📝 استمارة حجز</h3>
+    <input placeholder="رقم الهاتف">
+    <input placeholder="البريد الإلكتروني">
+    <input type="date">
+    <input type="date">
+    <input placeholder="عدد البالغين">
+    <input placeholder="عدد الأطفال">
+    <button onclick="alert('تم إرسال الحجز ✅')">إرسال</button>
+    <button onclick="logout()">خروج</button>
+  </div>
+</div>
 
-      <!-- CLIENT FORM -->
-      <div id="clientSection" class="section active">
-        <h3>📋 استمارة الحجز</h3>
-        <input id="phone" placeholder="رقم الهاتف">
-        <input id="email" placeholder="البريد الإلكتروني">
-        <input id="checkin" placeholder="تاريخ الوصول">
-        <input id="checkout" placeholder="تاريخ المغادرة">
-        <input id="adults" placeholder="عدد البالغين">
-        <input id="kids" placeholder="عدد الأطفال">
-        <button onclick="sendBooking()">إرسال</button>
-      </div>
+<!-- CAFE -->
+<div id="cafe" class="section wrap">
+  <div class="box">
+    <h3>☕ طلبات الكافيه</h3>
+    <div class="item">غرفة 3 | شاي</div>
+    <div class="item">غرفة 5 | قهوة</div>
+    <button onclick="logout()">خروج</button>
+  </div>
+</div>
 
-      <!-- STAFF -->
-      <div id="staffSection" class="section">
-        <h3>🧾 طلبات الفندق</h3>
-        <div id="orders"></div>
-      </div>
+<!-- HOTEL -->
+<div id="hotel" class="section wrap">
+  <div class="box">
+    <h3>🏨 حجوزات الفندق</h3>
+    <div class="item">محمد | 2 بالغين | 1 طفل</div>
+    <div class="item">أحمد | 3 بالغين</div>
+    <button onclick="logout()">خروج</button>
+  </div>
+</div>
 
-      <button onclick="logout()">🚪 خروج</button>
-    </div>
+<!-- OWNER -->
+<div id="owner" class="section wrap">
+  <div class="box">
+    <h3>👑 لوحة الأونر</h3>
+    <div class="item">📋 كل الحجوزات</div>
+    <div class="item">☕ كل طلبات الكافيه</div>
+    <div class="item">🏨 كل طلبات الفندق</div>
+    <button onclick="logout()">خروج</button>
   </div>
 </div>
 
 <script>
-const STAFF_CODE = "QUEEN-STAFF";
+const CAFE_CODE="QUEEN-CAFE";
+const HOTEL_CODE="QUEEN-HOTEL";
+const OWNER_CODE="QUEEN-OWNER";
 
 function login(){
-  const name = nameInput.value.trim();
-  if(!name){alert("اكتب اسمك");return;}
-  localStorage.setItem("user",name);
-  localStorage.setItem("role","client");
-  start();
-}
+  const name=nameInput.value.trim();
+  const role=roleInput.value;
+  if(!name){alert("اكتب الاسم");return;}
 
-function staffLogin(){
-  const code = prompt("اكتب كود الموظف");
-  if(code !== STAFF_CODE){alert("كود غلط");return;}
-  localStorage.setItem("role","staff");
-  start();
-}
+  if(role!=="client"){
+    const code=prompt("اكتب الكود");
+    if(
+      (role==="cafe" && code!==CAFE_CODE)||
+      (role==="hotel"&&code!==HOTEL_CODE)||
+      (role==="owner"&&code!==OWNER_CODE)
+    ){
+      alert("كود غلط");return;
+    }
+  }
 
-function start(){
   loginBox.style.display="none";
-  app.style.display="block";
-
-  if(localStorage.getItem("role")==="staff"){
-    clientSection.classList.remove("active");
-    staffSection.classList.add("active");
-    renderOrders();
-  }
-}
-
-function sendBooking(){
-  if(!phone.value || !checkin.value){
-    alert("كمل البيانات");
-    return;
-  }
-  const orders = JSON.parse(localStorage.getItem("orders")||"[]");
-  orders.push({
-    name:localStorage.getItem("user"),
-    phone:phone.value,
-    checkin:checkin.value,
-    checkout:checkout.value
-  });
-  localStorage.setItem("orders",JSON.stringify(orders));
-  alert("تم الإرسال ✅");
-}
-
-function renderOrders(){
-  orders.innerHTML="";
-  const data = JSON.parse(localStorage.getItem("orders")||"[]");
-  data.forEach(o=>{
-    orders.innerHTML+=`
-      <div class="item small">
-        ${o.name} | ${o.phone} | ${o.checkin}
-      </div>`;
-  });
+  document.getElementById(role).classList.add("active");
 }
 
 function logout(){
-  localStorage.clear();
   location.reload();
 }
 </script>
