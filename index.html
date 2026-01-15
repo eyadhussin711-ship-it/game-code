@@ -2,76 +2,177 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>Login Fixed</title>
+<title>UC Store</title>
 
 <style>
+*{box-sizing:border-box;font-family:Arial}
 body{
   margin:0;
+  height:100vh;
+  background:#0f2027;
+  color:#fff;
+}
+
+/* ===== LOGIN ===== */
+#login{
   height:100vh;
   display:flex;
   justify-content:center;
   align-items:center;
-  background:#0f2027;
-  font-family:Arial;
 }
-.box{
+.login-box{
+  width:320px;
   background:#1f3b4d;
   padding:25px;
-  border-radius:12px;
-  width:300px;
+  border-radius:14px;
   text-align:center;
-  color:#fff;
 }
-input,button{
+.login-box input,
+.login-box button{
   width:100%;
   padding:12px;
   margin:8px 0;
   border:none;
-  border-radius:8px;
+  border-radius:10px;
 }
-button{
+.login-box button{
   background:#00f5ff;
   font-weight:bold;
   cursor:pointer;
 }
-#store{
+
+/* ===== APP ===== */
+#app{
   display:none;
+  height:100vh;
+}
+
+/* Layout */
+.app{
+  display:flex;
+  height:100%;
+}
+
+/* Sidebar */
+.sidebar{
+  width:220px;
+  background:#102a36;
+  padding:15px;
+}
+.sidebar h3{
+  text-align:center;
+  margin-bottom:20px;
+}
+.sidebar button{
+  width:100%;
+  margin:6px 0;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  background:#00f5ff;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+/* Content */
+.content{
+  flex:1;
+  padding:20px;
+}
+.card{
+  background:#1f3b4d;
+  padding:15px;
+  border-radius:12px;
+  margin:10px 0;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.buy{
+  background:#ffd166;
+  border:none;
+  padding:8px 16px;
+  border-radius:20px;
+  cursor:pointer;
 }
 </style>
 </head>
 
 <body>
 
-<div class="box" id="loginBox">
-  <h3>تسجيل الدخول</h3>
-  <input id="nameInput" placeholder="اسمك">
-  <button id="loginBtn">دخول</button>
+<!-- LOGIN -->
+<div id="login">
+  <div class="login-box">
+    <h3>تسجيل الدخول</h3>
+    <input id="username" placeholder="اسمك">
+    <button onclick="login()">دخول</button>
+  </div>
 </div>
 
-<div class="box" id="store">
-  <h3>🛒 UC STORE</h3>
-  <p id="welcome"></p>
-  <p>60 UC</p>
-  <p>300 UC</p>
-  <p>600 UC</p>
-  <button onclick="location.reload()">خروج</button>
+<!-- APP -->
+<div id="app">
+  <div class="app">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <h3>UC STORE</h3>
+      <button>🛒 المتجر</button>
+      <button disabled>🧾 الشكاوي</button>
+      <button onclick="logout()">🚪 خروج</button>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+      <h2 id="welcome"></h2>
+
+      <div class="card">
+        <span>60 UC</span>
+        <button class="buy">شراء</button>
+      </div>
+      <div class="card">
+        <span>300 UC</span>
+        <button class="buy">شراء</button>
+      </div>
+      <div class="card">
+        <span>600 UC</span>
+        <button class="buy">شراء</button>
+      </div>
+    </div>
+
+  </div>
 </div>
 
 <script>
-document.getElementById("loginBtn").onclick = function(){
-  var name = document.getElementById("nameInput").value;
-  if(name === ""){
+function login(){
+  let u = document.getElementById("username").value.trim();
+  if(u === ""){
     alert("اكتب اسمك");
     return;
   }
 
-  // إخفاء تسجيل الدخول
-  document.getElementById("loginBox").style.display = "none";
+  // حفظ الاسم فقط (بسيط)
+  localStorage.setItem("user", u);
 
-  // إظهار المتجر
-  document.getElementById("store").style.display = "block";
-  document.getElementById("welcome").innerText = "أهلاً " + name;
-};
+  // إظهار التطبيق
+  document.getElementById("login").style.display="none";
+  document.getElementById("app").style.display="block";
+  document.getElementById("welcome").innerText = "أهلاً " + u;
+}
+
+function logout(){
+  localStorage.clear();
+  location.reload();
+}
+
+// دخول تلقائي
+window.onload = function(){
+  let u = localStorage.getItem("user");
+  if(u){
+    document.getElementById("login").style.display="none";
+    document.getElementById("app").style.display="block";
+    document.getElementById("welcome").innerText = "أهلاً " + u;
+  }
+}
 </script>
 
 </body>
