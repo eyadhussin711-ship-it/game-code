@@ -2,7 +2,7 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>UC Store Support</title>
+<title>UC Store</title>
 
 <style>
 *{box-sizing:border-box;font-family:Arial}
@@ -11,9 +11,8 @@ body{
   background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
   color:#fff;
 }
-.hidden{display:none}
 
-/* Login */
+/* ===== Login ===== */
 #login{
   height:100vh;
   display:flex;
@@ -41,59 +40,31 @@ body{
   border-radius:20px;
   background:#00f5ff;
   font-weight:bold;
+  cursor:pointer;
 }
 
-/* App */
-#app{display:flex;height:100vh}
-
-/* Sidebar */
-.sidebar{
-  width:220px;
-  background:rgba(0,0,0,.45);
-  padding:15px;
+/* ===== App ===== */
+#app{
+  display:none; /* مهم */
+  height:100vh;
 }
-.sidebar button{
-  width:100%;
-  padding:12px;
-  margin:8px 0;
-  border:none;
-  border-radius:14px;
+
+/* Sections */
+.section{
+  display:none;
+  padding:20px;
+}
+.section.active{
+  display:block;
+}
+
+/* Owner */
+.owner-box{
   background:rgba(255,255,255,.15);
-  color:#fff;
-  cursor:pointer;
+  padding:15px;
+  border-radius:12px;
+  margin-top:20px;
 }
-.sidebar button.active{
-  background:#00f5ff;
-  color:#000;
-}
-
-/* Main */
-.main{flex:1;padding:15px}
-.section{display:none}
-.section.active{display:block}
-
-/* Tickets */
-.ticket{
-  background:rgba(255,255,255,.12);
-  padding:10px;
-  border-radius:10px;
-  margin:8px 0;
-  cursor:pointer;
-}
-
-/* Chat */
-.chat{
-  background:rgba(0,0,0,.3);
-  padding:10px;
-  height:300px;
-  overflow:auto;
-  border-radius:10px;
-}
-.msg{
-  margin:6px 0;
-}
-.me{color:#00f5ff}
-.admin{color:#ffd166}
 </style>
 </head>
 
@@ -110,64 +81,68 @@ body{
 </div>
 
 <!-- APP -->
-<div id="app" class="hidden">
-  <div class="sidebar">
-    <button class="nav active" onclick="openSec('tickets',this)">🧾 الشكاوي</button>
-    <button class="nav ownerOnly hidden" onclick="openSec('admin',this)">🛠 دعم</button>
-    <button onclick="logout()">🚪 خروج</button>
+<div id="app">
+  <h2>أهلاً <span id="userName"></span></h2>
+
+  <!-- STORE -->
+  <div id="store" class="section active">
+    <h3>🛒 المتجر</h3>
+    <p>60 UC</p>
+    <p>300 UC</p>
+    <p>600 UC</p>
   </div>
 
-  <div class="main">
-    <h3>أهلاً <span id="user"></span></h3>
-
-    <!-- USER TICKETS -->
-    <div id="tickets" class="section active">
-      <input id="ticketMsg" placeholder="اكتب الشكوى">
-      <button onclick="createTicket()">فتح شكوى</button>
-      <div id="myTickets"></div>
+  <!-- OWNER PANEL -->
+  <div id="ownerPanel" class="section">
+    <div class="owner-box">
+      <h3>👑 لوحة الأونر</h3>
+      <p>دي بتظهر للأونر بس</p>
+      <button>توظيف</button>
+      <button>ترقية</button>
+      <button>فصل</button>
     </div>
-
-    <!-- ADMIN PANEL -->
-    <div id="admin" class="section">
-      <h4>كل الشكاوي</h4>
-      <div id="allTickets"></div>
-    </div>
-
-    <!-- CHAT -->
-    <div id="chatRoom" class="section">
-      <h4>روم الشكوى</h4>
-      <div class="chat" id="chat"></div>
-      <input id="chatMsg" placeholder="اكتب رسالة">
-      <button onclick="sendMsg()">إرسال</button>
-    </div>
-
   </div>
+
+  <button onclick="logout()">🚪 خروج</button>
 </div>
 
 <script>
-let currentTicket=null;
+const OWNER_CODE = "OWNER-999";
 
 function login(){
-  let u=username.value.trim();
-  if(!u)return alert("اكتب اسمك");
+  const user = document.getElementById("username").value.trim();
+  const code = document.getElementById("code").value.trim();
 
-  let role = (code.value==="OWNER-999") ? "Owner" : "Player";
-  localStorage.user=u;
-  localStorage.role=role;
-
-  start();
-}
-
-function start(){
-  login.style.display="none";
-  app.classList.remove("hidden");
-  user.innerText=localStorage.user;
-
-  if(localStorage.role==="Owner"){
-    document.querySelector(".ownerOnly").classList.remove("hidden");
+  if(user === ""){
+    alert("اكتب اسمك");
+    return;
   }
 
-  loadTickets();
+  // تحديد الرتبة
+  let role = "Player";
+  if(code === OWNER_CODE){
+    role = "Owner";
+  }
+
+  // حفظ
+  localStorage.setItem("user", user);
+  localStorage.setItem("role", role);
+
+  startApp();
+}
+
+function startApp(){
+  // إخفاء تسجيل الدخول نهائي
+  document.getElementById("login").style.display = "none";
+
+  // إظهار التطبيق
+  document.getElementById("app").style.display = "block";
+  document.getElementById("userName").innerText = localStorage.getItem("user");
+
+  // إظهار فورم الأونر لو أونر
+  if(localStorage.getItem("role") === "Owner"){
+    document.getElementById("ownerPanel").classList.add("active");
+  }
 }
 
 function logout(){
@@ -175,74 +150,12 @@ function logout(){
   location.reload();
 }
 
-function openSec(id,btn){
-  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-  document.querySelectorAll(".nav").forEach(b=>b.classList.remove("active"));
-  btn.classList.add("active");
+// دخول تلقائي
+window.onload = function(){
+  if(localStorage.getItem("user")){
+    startApp();
+  }
 }
-
-function createTicket(){
-  let msg=ticketMsg.value.trim();
-  if(!msg)return;
-
-  let tickets=JSON.parse(localStorage.tickets||"[]");
-  tickets.push({
-    id:Date.now(),
-    user:localStorage.user,
-    messages:[{from:"me",text:msg}]
-  });
-  localStorage.tickets=JSON.stringify(tickets);
-  ticketMsg.value="";
-  loadTickets();
-}
-
-function loadTickets(){
-  let tickets=JSON.parse(localStorage.tickets||"[]");
-  myTickets.innerHTML="";
-  allTickets.innerHTML="";
-
-  tickets.forEach(t=>{
-    if(t.user===localStorage.user){
-      myTickets.innerHTML+=`<div class="ticket" onclick="openChat(${t.id})">شكوى #${t.id}</div>`;
-    }
-    if(localStorage.role==="Owner"){
-      allTickets.innerHTML+=`<div class="ticket" onclick="openChat(${t.id})">${t.user} - #${t.id}</div>`;
-    }
-  });
-}
-
-function openChat(id){
-  currentTicket=id;
-  openSec('chatRoom',{classList:{add(){}}});
-  renderChat();
-}
-
-function renderChat(){
-  let tickets=JSON.parse(localStorage.tickets);
-  let t=tickets.find(x=>x.id===currentTicket);
-  chat.innerHTML="";
-  t.messages.forEach(m=>{
-    chat.innerHTML+=`<div class="msg ${m.from}">${m.text}</div>`;
-  });
-}
-
-function sendMsg(){
-  let txt=chatMsg.value.trim();
-  if(!txt)return;
-
-  let tickets=JSON.parse(localStorage.tickets);
-  let t=tickets.find(x=>x.id===currentTicket);
-  t.messages.push({
-    from: localStorage.role==="Owner" ? "admin":"me",
-    text: txt
-  });
-  localStorage.tickets=JSON.stringify(tickets);
-  chatMsg.value="";
-  renderChat();
-}
-
-window.onload=()=>localStorage.user&&start();
 </script>
 
 </body>
