@@ -1,41 +1,101 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-    <meta charset="UTF-8">
-    <title>Game Code Generator</title>
-    <style>
-        body {
-            font-family: Arial;
-            text-align: center;
-            margin-top: 50px;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-        }
-        #code {
-            margin-top: 20px;
-            font-size: 20px;
-            color: green;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Game Store</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: #f2f2f2;
+    text-align: center;
+}
+.box {
+    background: white;
+    padding: 20px;
+    width: 300px;
+    margin: 50px auto;
+    border-radius: 8px;
+}
+button {
+    padding: 10px;
+    width: 100%;
+    margin-top: 10px;
+    cursor: pointer;
+}
+input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 10px;
+}
+#store, #result {
+    display: none;
+}
+.code {
+    color: green;
+    font-size: 18px;
+    margin-top: 15px;
+}
+</style>
 </head>
+
 <body>
 
-<h1>مولد أكواد الشحن (تجريبي)</h1>
+<div class="box" id="login">
+    <h2>تسجيل دخول</h2>
+    <input id="username" placeholder="اسم المستخدم">
+    <button onclick="login()">دخول</button>
+</div>
 
-<button onclick="generateCode()">طلع كود</button>
+<div class="box" id="store">
+    <h2>🛒 متجر الأكواد</h2>
+    <p>منتج: Google Play Code</p>
+    <button onclick="buy()">شراء</button>
+</div>
 
-<div id="code"></div>
+<div class="box" id="result">
+    <h2>🎉 كودك</h2>
+    <div class="code" id="code"></div>
+</div>
 
 <script>
-function generateCode() {
+function login() {
+    let user = document.getElementById("username").value;
+    if(user === "") return alert("اكتب اسمك");
+
+    localStorage.setItem("user", user);
+    document.getElementById("login").style.display = "none";
+    document.getElementById("store").style.display = "block";
+}
+
+function buy() {
+    let user = localStorage.getItem("user");
+    let used = localStorage.getItem("used_" + user);
+
+    if(used) {
+        alert("أنت أخذت كود قبل كده");
+        return;
+    }
+
     let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     let code = "";
-    for (let i = 0; i < 16; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
+    for(let i = 0; i < 16; i++) {
+        code += chars[Math.floor(Math.random() * chars.length)];
     }
-    document.getElementById("code").innerText = "CODE: " + code;
+
+    localStorage.setItem("used_" + user, code);
+
+    document.getElementById("store").style.display = "none";
+    document.getElementById("result").style.display = "block";
+    document.getElementById("code").innerText = code;
+}
+
+window.onload = function() {
+    let user = localStorage.getItem("user");
+    if(user) {
+        document.getElementById("login").style.display = "none";
+        document.getElementById("store").style.display = "block";
+    }
 }
 </script>
 
