@@ -2,242 +2,96 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>UC Top Up</title>
+<title>Login System</title>
 
 <style>
-*{box-sizing:border-box;font-family:'Segoe UI',Arial}
+*{box-sizing:border-box;font-family:Arial}
 body{
   margin:0;
-  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-  color:#fff;
-  overflow:hidden;
-}
-
-/* ===== Layout ===== */
-.app{display:flex;height:100vh}
-.sidebar{
-  width:240px;
-  background:rgba(0,0,0,.4);
-  backdrop-filter: blur(10px);
-  padding:20px;
-  animation:slide .5s;
-}
-@keyframes slide{
-  from{transform:translateX(-100%)}
-  to{transform:translateX(0)}
-}
-.sidebar h2{
-  text-align:center;
-  margin-bottom:20px;
-  color:#00f5ff;
-}
-.sidebar button{
-  width:100%;
-  padding:12px;
-  margin:8px 0;
-  border:none;
-  border-radius:12px;
-  background:linear-gradient(135deg,#00f5ff,#00b4d8);
-  color:#000;
-  font-weight:bold;
-  cursor:pointer;
-  transition:.3s;
-}
-.sidebar button:hover{
-  transform:scale(1.05);
-  box-shadow:0 0 15px #00f5ff;
-}
-
-.main{
-  flex:1;
-  padding:30px;
-  overflow:auto;
-}
-
-/* ===== Header ===== */
-.header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-.header h3 span{
-  color:#00f5ff;
-}
-
-/* ===== Cards ===== */
-.cards{
-  margin-top:30px;
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-  gap:20px;
-}
-
-.card{
-  background:rgba(255,255,255,.05);
-  border-radius:20px;
-  padding:20px;
-  text-align:center;
-  position:relative;
-  overflow:hidden;
-  transition:.4s;
-}
-.card::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:linear-gradient(120deg,transparent,#00f5ff,transparent);
-  opacity:.2;
-  transform:translateX(-100%);
-}
-.card:hover::before{
-  transform:translateX(100%);
-  transition:.6s;
-}
-.card:hover{
-  transform:translateY(-10px) scale(1.03);
-  box-shadow:0 0 25px rgba(0,245,255,.6);
-}
-.card img{
-  width:70px;
-}
-.card h4{
-  margin:15px 0 5px;
-}
-.price{
-  color:#ffd166;
-  font-size:18px;
-}
-.buy{
-  margin-top:15px;
-  padding:10px;
-  width:100%;
-  border:none;
-  border-radius:20px;
-  background:linear-gradient(135deg,#ffd166,#fca311);
-  font-weight:bold;
-  cursor:pointer;
-  transition:.3s;
-}
-.buy:hover{
-  box-shadow:0 0 20px #ffd166;
-}
-
-/* ===== Login ===== */
-.login{
-  position:fixed;
-  inset:0;
+  height:100vh;
   display:flex;
   justify-content:center;
   align-items:center;
-  background:rgba(0,0,0,.7);
+  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  color:#fff;
 }
 .login-box{
-  background:rgba(255,255,255,.05);
-  backdrop-filter:blur(12px);
+  background:rgba(255,255,255,.08);
   padding:30px;
-  border-radius:20px;
+  border-radius:16px;
   width:320px;
   text-align:center;
-  animation:pop .4s;
-}
-@keyframes pop{
-  from{transform:scale(.7);opacity:0}
-  to{transform:scale(1);opacity:1}
 }
 .login-box h2{
-  color:#00f5ff;
+  margin-bottom:20px;
 }
 .login-box input{
   width:100%;
   padding:12px;
   margin:10px 0;
-  border-radius:10px;
   border:none;
+  border-radius:10px;
 }
 .login-box button{
   width:100%;
   padding:12px;
   border:none;
   border-radius:20px;
-  background:linear-gradient(135deg,#00f5ff,#00b4d8);
+  background:#00f5ff;
+  color:#000;
   font-weight:bold;
   cursor:pointer;
 }
+.hidden{display:none}
+.role{
+  margin-top:15px;
+  font-weight:bold;
+}
+.owner{color:#ffd166}
+.player{color:#06d6a0}
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
-<div class="login" id="login">
-  <div class="login-box">
-    <h2>تسجيل الدخول</h2>
-    <input id="email" placeholder="Gmail">
-    <button onclick="login()">دخول</button>
-  </div>
-</div>
-
-<div class="app hidden" id="app">
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <h2>UC STORE</h2>
-    <button>🛒 المتجر</button>
-    <button>📦 مشترياتي</button>
-    <button>🧾 الشكاوي</button>
-    <button>🧑‍💼 الدعم</button>
-    <button onclick="logout()">🚪 خروج</button>
-  </div>
-
-  <!-- Main -->
-  <div class="main">
-    <div class="header">
-      <h3>أهلاً <span id="user"></span></h3>
-      <h4>💎 UC</h4>
-    </div>
-
-    <div class="cards">
-      <div class="card">
-        <img src="https://i.imgur.com/6XgqZ6R.png">
-        <h4>60 UC</h4>
-        <div class="price">EGP 41.99</div>
-        <button class="buy">شراء</button>
-      </div>
-
-      <div class="card">
-        <img src="https://i.imgur.com/6XgqZ6R.png">
-        <h4>300 UC</h4>
-        <div class="price">EGP 209.99</div>
-        <button class="buy">شراء</button>
-      </div>
-
-      <div class="card">
-        <img src="https://i.imgur.com/6XgqZ6R.png">
-        <h4>600 UC</h4>
-        <div class="price">EGP 419.99</div>
-        <button class="buy">شراء</button>
-      </div>
-    </div>
-  </div>
+<div class="login-box" id="login">
+  <h2>تسجيل الدخول</h2>
+  <input id="name" placeholder="الإيميل أو الاسم">
+  <input id="code" placeholder="كود الدخول">
+  <button onclick="login()">دخول</button>
+  <div class="role" id="roleText"></div>
 </div>
 
 <script>
+const OWNER_CODE = "OWNER-999";
+
 function login(){
-  let email=document.getElementById("email").value;
-  if(!email) return alert("اكتب الإيميل");
-  localStorage.setItem("user",email);
-  start();
+  const name = document.getElementById("name").value.trim();
+  const code = document.getElementById("code").value.trim();
+
+  if(!name || !code){
+    alert("كمّل البيانات");
+    return;
+  }
+
+  let role = "player";
+  if(code === OWNER_CODE){
+    role = "owner";
+  }
+
+  localStorage.setItem("userName", name);
+  localStorage.setItem("userRole", role);
+
+  showRole(role);
 }
-function start(){
-  document.getElementById("login").style.display="none";
-  document.getElementById("app").classList.remove("hidden");
-  document.getElementById("user").innerText=localStorage.getItem("user");
-}
-function logout(){
-  localStorage.removeItem("user");
-  location.reload();
-}
-window.onload=function(){
-  if(localStorage.getItem("user")) start();
+
+function showRole(role){
+  const text = document.getElementById("roleText");
+  if(role === "owner"){
+    text.innerHTML = "✅ تم تسجيلك كـ <span class='owner'>OWNER</span>";
+  }else{
+    text.innerHTML = "✅ تم تسجيلك كلاعب <span class='player'>PLAYER</span>";
+  }
 }
 </script>
 
