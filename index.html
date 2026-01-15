@@ -2,32 +2,31 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>Login</title>
+<title>UC Store</title>
 
 <style>
-*{
-  box-sizing:border-box;
-  font-family:Arial;
-}
+*{box-sizing:border-box;font-family:Arial}
 body{
   margin:0;
+  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  color:#fff;
+}
+
+/* ===== Login ===== */
+.login{
   height:100vh;
   display:flex;
   justify-content:center;
   align-items:center;
-  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
 }
 .login-box{
   width:320px;
-  background:rgba(255,255,255,0.1);
+  background:rgba(255,255,255,.1);
   padding:25px;
-  border-radius:15px;
+  border-radius:16px;
   text-align:center;
-  color:#fff;
 }
-.login-box h2{
-  margin-bottom:20px;
-}
+.login-box h2{margin-bottom:20px}
 .login-box input{
   width:100%;
   padding:12px;
@@ -46,30 +45,115 @@ body{
   font-weight:bold;
   cursor:pointer;
 }
-.result{
-  margin-top:15px;
+
+/* ===== Store ===== */
+.hidden{display:none}
+
+.store{
+  display:flex;
+  height:100vh;
+}
+.sidebar{
+  width:220px;
+  background:rgba(0,0,0,.4);
+  padding:15px;
+}
+.sidebar h3{text-align:center;color:#00f5ff}
+.sidebar button{
+  width:100%;
+  padding:10px;
+  margin:6px 0;
+  border:none;
+  border-radius:10px;
+  background:#00f5ff;
+  color:#000;
   font-weight:bold;
+  cursor:pointer;
 }
-.owner{
-  color:#ffd166;
+
+.main{
+  flex:1;
+  padding:20px;
 }
-.player{
-  color:#06d6a0;
+.cards{
+  margin-top:20px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:20px;
 }
+.card{
+  background:rgba(255,255,255,.08);
+  padding:20px;
+  border-radius:16px;
+  text-align:center;
+}
+.card h4{margin:10px 0}
+.price{color:#ffd166}
+.buy{
+  margin-top:10px;
+  padding:10px;
+  width:100%;
+  border:none;
+  border-radius:20px;
+  background:#ffd166;
+  font-weight:bold;
+  cursor:pointer;
+}
+.role{
+  margin-top:10px;
+  font-size:14px;
+}
+.owner{color:#ffd166}
+.player{color:#06d6a0}
 </style>
 </head>
 
 <body>
 
-<div class="login-box">
-  <h2>تسجيل الدخول</h2>
+<!-- LOGIN -->
+<div class="login" id="login">
+  <div class="login-box">
+    <h2>تسجيل الدخول</h2>
+    <input id="username" placeholder="الإيميل أو الاسم">
+    <input id="code" placeholder="كود الدخول">
+    <button onclick="login()">دخول</button>
+    <div class="role" id="roleText"></div>
+  </div>
+</div>
 
-  <input id="username" placeholder="الإيميل أو الاسم">
-  <input id="code" placeholder="كود الدخول">
+<!-- STORE -->
+<div class="store hidden" id="store">
+  <div class="sidebar">
+    <h3>UC STORE</h3>
+    <button>🛒 المتجر</button>
+    <button>📦 مشترياتي</button>
+    <button>🧾 الدعم</button>
+    <button onclick="logout()">🚪 خروج</button>
+  </div>
 
-  <button onclick="login()">دخول</button>
+  <div class="main">
+    <h2>أهلاً <span id="userName"></span></h2>
 
-  <div class="result" id="result"></div>
+    <div class="cards">
+      <div class="card">
+        <h4>60 UC</h4>
+        <div class="price">EGP 41.99</div>
+        <button class="buy">شراء</button>
+      </div>
+
+      <div class="card">
+        <h4>300 UC</h4>
+        <div class="price">EGP 209.99</div>
+        <button class="buy">شراء</button>
+      </div>
+
+      <div class="card">
+        <h4>600 UC</h4>
+        <div class="price">EGP 419.99</div>
+        <button class="buy">شراء</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -78,22 +162,39 @@ const OWNER_CODE = "OWNER-999";
 function login(){
   let user = document.getElementById("username").value.trim();
   let code = document.getElementById("code").value.trim();
-  let result = document.getElementById("result");
 
-  if(user === "" || code === ""){
+  if(user==="" || code===""){
     alert("اكتب الاسم والكود");
     return;
   }
 
-  if(code === OWNER_CODE){
-    result.innerHTML = "✅ تم تسجيلك كـ <span class='owner'>OWNER</span>";
-    localStorage.setItem("role","owner");
-  }else{
-    result.innerHTML = "✅ تم تسجيلك كـ <span class='player'>PLAYER</span>";
-    localStorage.setItem("role","player");
-  }
+  let role = (code === OWNER_CODE) ? "owner" : "player";
 
   localStorage.setItem("user",user);
+  localStorage.setItem("role",role);
+
+  document.getElementById("login").style.display="none";
+  document.getElementById("store").classList.remove("hidden");
+  document.getElementById("userName").innerText=user;
+
+  document.getElementById("roleText").innerHTML =
+    role==="owner"
+    ? "OWNER <span class='owner'>(صلاحيات كاملة)</span>"
+    : "PLAYER <span class='player'>(عادي)</span>";
+}
+
+function logout(){
+  localStorage.clear();
+  location.reload();
+}
+
+// دخول تلقائي لو مسجل قبل كده
+window.onload = function(){
+  if(localStorage.getItem("user")){
+    document.getElementById("login").style.display="none";
+    document.getElementById("store").classList.remove("hidden");
+    document.getElementById("userName").innerText=localStorage.getItem("user");
+  }
 }
 </script>
 
