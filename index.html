@@ -6,258 +6,277 @@
 <title>Queen Hotel System</title>
 
 <style>
-*{box-sizing:border-box;font-family:Tahoma}
+*{box-sizing:border-box;font-family:Tahama}
 body{
   margin:0;
-  background:linear-gradient(135deg,#0a0f2a,#1a0066,#000);
-  color:#fff;
   min-height:100vh;
+  background:linear-gradient(135deg,#0a1aff,#000,#a00000);
+  color:#fff;
 }
+.hidden{display:none}
+.wrap{max-width:1100px;margin:auto;padding:15px}
 
-/* ===== LOGIN ===== */
-#login{
-  height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
+/* LOGIN */
 .login-box{
-  background:rgba(0,0,0,.6);
-  padding:30px;
-  border-radius:20px;
-  width:320px;
-  box-shadow:0 0 40px #000;
-  animation:pop .6s;
+  max-width:400px;
+  margin:80px auto;
+  background:#0b1230;
+  padding:25px;
+  border-radius:16px;
 }
-@keyframes pop{from{transform:scale(.8)}to{transform:scale(1)}}
 .login-box h1{
   text-align:center;
-  color:#ff004c;
-  text-shadow:0 0 20px red;
+  color:red;
 }
-input,select,button,textarea{
+input,select,button{
   width:100%;
   padding:12px;
-  margin:8px 0;
-  border-radius:12px;
+  margin:6px 0;
   border:none;
+  border-radius:10px;
 }
 button{
-  background:#0a66ff;
+  background:#2563ff;
   color:#fff;
-  font-weight:bold;
   cursor:pointer;
 }
-button:hover{opacity:.9}
 
-/* ===== APP ===== */
-#app{display:none}
-.top{
+/* APP */
+.nav{
   display:flex;
-  gap:6px;
-  padding:10px;
-  background:#060a22;
+  gap:8px;
+  margin-bottom:10px;
 }
-.top button{flex:1}
+.nav button{flex:1}
 
 .main{
   display:flex;
-  height:calc(100vh - 60px);
+  gap:15px;
 }
 
-/* SIDEBAR */
-.sidebar{
-  width:180px;
-  background:#0b0f2a;
+/* ROOMS LIST */
+.rooms{
+  width:260px;
+  background:#0b1230;
   padding:10px;
+  border-radius:12px;
 }
 .room{
-  background:#10184a;
-  padding:12px;
-  border-radius:12px;
+  padding:10px;
   margin:6px 0;
+  border-radius:8px;
   cursor:pointer;
-  display:flex;
-  justify-content:space-between;
+  background:#133b13;
 }
-.free{border-right:5px solid #00ff99}
-.busy{border-right:5px solid red}
+.room.busy{background:#7a0000}
+.room:hover{opacity:.85}
 
 /* CONTENT */
 .content{
   flex:1;
+  background:#0b1230;
   padding:15px;
-}
-.box{
-  background:rgba(0,0,0,.4);
-  padding:20px;
-  border-radius:18px;
-}
-.item{
-  background:#10184a;
-  padding:12px;
   border-radius:12px;
-  margin:6px 0;
 }
-
-/* HIDE */
-.section{display:none}
-.section.active{display:block}
+.card{
+  background:#111c44;
+  padding:12px;
+  border-radius:10px;
+  margin-bottom:10px;
+}
+.small{font-size:12px;opacity:.8}
 </style>
 </head>
 
 <body>
 
 <!-- LOGIN -->
-<div id="login">
-  <div class="login-box">
-    <h1>QUEEN</h1>
-    <input id="lname" placeholder="اسمك">
-    <select id="lrole">
-      <option value="client">عميل</option>
-      <option value="hotel">موظف فندق</option>
-      <option value="cafe">موظف كافيه</option>
-      <option value="owner">أونر</option>
-    </select>
-    <input id="lcode" placeholder="كود (للموظفين)">
-    <button onclick="login()">دخول</button>
-  </div>
+<div id="loginBox" class="login-box">
+  <h1>QUEEN HOTEL</h1>
+  <input id="nameInput" placeholder="اسمك">
+  <select id="roleSelect">
+    <option value="client">عميل</option>
+    <option value="hotel">موظف فندق</option>
+    <option value="cafe">موظف كافيه</option>
+    <option value="owner">أونر</option>
+  </select>
+  <input id="codeInput" placeholder="كود (للموظفين)">
+  <button onclick="login()">دخول</button>
 </div>
 
 <!-- APP -->
-<div id="app">
+<div id="app" class="wrap hidden">
 
-<div class="top">
-  <button onclick="show('rooms')">🏨 غرف</button>
-  <button onclick="show('cafe')">☕ كافيه</button>
-  <button onclick="show('orders')">📩 طلبات</button>
-  <button onclick="show('news')">📰 أخبار</button>
-  <button onclick="show('events')">🎉 حفلات</button>
-  <button onclick="logout()">🚪</button>
-</div>
+  <div class="nav">
+    <button onclick="showPage('rooms')">🏨 الغرف</button>
+    <button onclick="showPage('cafe')">☕ الكافيه</button>
+    <button onclick="showPage('news')">📰 الأخبار</button>
+    <button onclick="showPage('orders')">📋 الطلبات</button>
+    <button onclick="logout()">🚪 خروج</button>
+  </div>
 
-<div class="main">
+  <div class="main">
 
-  <!-- ROOMS -->
-  <div class="sidebar" id="rooms"></div>
-
-  <div class="content">
-
-    <div id="roomForm" class="section active">
-      <div class="box">اختار غرفة من الشمال</div>
+    <!-- ROOMS -->
+    <div class="rooms">
+      <h3>حالة الغرف</h3>
+      <div id="roomsList"></div>
     </div>
 
-    <div id="cafe" class="section">
-      <div class="box">
-        <h3>الكافيه</h3>
-        <button onclick="orderCafe('قهوة')">☕ قهوة</button>
-        <button onclick="orderCafe('شاي')">🍵 شاي</button>
-        <button onclick="orderCafe('برجر')">🍔 برجر</button>
-        <button onclick="orderCafe('بيتزا')">🍕 بيتزا</button>
+    <!-- CONTENT -->
+    <div class="content">
+      <div id="roomsPage" class="page">
+        <h3>تفاصيل الغرفة</h3>
+        <div id="roomDetails" class="card small">اختار غرفة من الجنب</div>
       </div>
-    </div>
 
-    <div id="orders" class="section">
-      <div class="box" id="ordersList"></div>
-    </div>
+      <div id="cafePage" class="page hidden">
+        <h3>الكافيه</h3>
+        <div class="card">☕ قهوة <button onclick="order('قهوة')">طلب</button></div>
+        <div class="card">🥤 عصير <button onclick="order('عصير')">طلب</button></div>
+        <div class="card">🍔 برجر <button onclick="order('برجر')">طلب</button></div>
+      </div>
 
-    <div id="news" class="section">
-      <div class="box">
+      <div id="newsPage" class="page hidden">
+        <h3>الأخبار</h3>
+        <div id="newsList"></div>
         <textarea id="newsText" placeholder="خبر جديد"></textarea>
         <button onclick="addNews()">نشر</button>
-        <div id="newsList"></div>
       </div>
-    </div>
 
-    <div id="events" class="section">
-      <div class="box">
-        <img src="https://i.imgur.com/DE0F3961.jpg" style="width:100%;border-radius:12px">
-        <p>حفلات Queen Plaza – العين السخنة</p>
+      <div id="ordersPage" class="page hidden">
+        <h3>الطلبات</h3>
+        <div id="ordersList"></div>
       </div>
     </div>
 
   </div>
 </div>
-</div>
 
 <script>
-const CODES={hotel:"HOTEL-1",cafe:"CAFE-1",owner:"OWNER-1"};
+/* DATA */
+const ROOMS = [
+  {id:1,status:"free"},
+  {id:2,status:"free"},
+  {id:3,status:"free"},
+  {id:4,status:"free"},
+];
 
+const CODES = {
+  owner:"OWNER-QUEEN",
+  hotel:"HOTEL-QUEEN",
+  cafe:"CAFE-QUEEN"
+};
+
+/* LOGIN */
 function login(){
-  if(lrole.value!=="client" && lcode.value!==CODES[lrole.value])
-    return alert("كود غلط");
-  localStorage.user=lname.value;
-  localStorage.role=lrole.value;
-  start();
-}
+  const name = nameInput.value.trim();
+  const role = roleSelect.value;
+  const code = codeInput.value.trim();
 
-function start(){
-  login.style.display="none";
-  app.style.display="block";
-  initRooms();
+  if(!name) return alert("اكتب اسمك");
+
+  if(role!=="client" && code!==CODES[role])
+    return alert("الكود غلط");
+
+  localStorage.user=name;
+  localStorage.role=role;
+
+  loginBox.classList.add("hidden");
+  app.classList.remove("hidden");
+
   renderRooms();
-  show('roomForm');
 }
 
-function logout(){localStorage.clear();location.reload()}
-
-function show(id){
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-
-function initRooms(){
-  if(!localStorage.rooms)
-    localStorage.rooms=JSON.stringify([
-      {id:1,status:"free"},
-      {id:2,status:"free"},
-      {id:3,status:"free"},
-      {id:4,status:"free"},
-    ]);
-}
-
+/* ROOMS */
 function renderRooms(){
-  rooms.innerHTML="";
-  JSON.parse(localStorage.rooms).forEach(r=>{
-    rooms.innerHTML+=`
-      <div class="room ${r.status}" onclick="openRoom(${r.id})">
-        غرفة ${r.id}
-        <span>${r.status==="free"?"🟢":"🔴"}</span>
-      </div>`;
+  roomsList.innerHTML="";
+  ROOMS.forEach(r=>{
+    const div=document.createElement("div");
+    div.className="room "+(r.status==="busy"?"busy":"");
+    div.textContent="غرفة "+r.id;
+    div.onclick=()=>openRoom(r);
+    roomsList.appendChild(div);
   });
 }
 
-function openRoom(id){
-  show('roomForm');
-  roomForm.innerHTML=`
-    <div class="box">
-      <h3>غرفة ${id}</h3>
-      <input id="cname" placeholder="اسم العميل">
-      <input id="persons" placeholder="عدد الأشخاص">
-      <input id="days" placeholder="عدد الأيام">
-      <textarea id="note" placeholder="ملاحظات"></textarea>
-      <button onclick="reserve(${id})">إرسال</button>
-    </div>`;
+function openRoom(room){
+  roomDetails.innerHTML=`
+    <b>غرفة رقم ${room.id}</b><br>
+    الحالة: ${room.status==="free"?"🟢 فاضية":"🔴 محجوزة"}<hr>
+    <input id="guestName" placeholder="اسم النزيل">
+    <button onclick="bookRoom(${room.id})">تأكيد الحجز</button>
+  `;
 }
 
-function reserve(id){
-  let rooms=JSON.parse(localStorage.rooms);
-  rooms.find(r=>r.id===id).status="busy";
-  localStorage.rooms=JSON.stringify(rooms);
-  alert("تم الحجز");
+function bookRoom(id){
+  const name=document.getElementById("guestName").value;
+  if(!name) return alert("اكتب الاسم");
+  const room=ROOMS.find(r=>r.id===id);
+  room.status="busy";
+  saveOrder(`حجز غرفة ${id} - ${name}`);
   renderRooms();
+  roomDetails.innerHTML="تم الحجز ✔";
 }
 
-function orderCafe(item){
-  alert("تم طلب "+item);
+/* ORDERS */
+function saveOrder(text){
+  const orders=JSON.parse(localStorage.orders||"[]");
+  orders.push({text,time:new Date().toLocaleTimeString()});
+  localStorage.orders=JSON.stringify(orders);
+  renderOrders();
 }
 
+function renderOrders(){
+  ordersList.innerHTML="";
+  const orders=JSON.parse(localStorage.orders||"[]");
+  orders.forEach(o=>{
+    ordersList.innerHTML+=`<div class="card small">${o.text} | ${o.time}</div>`;
+  });
+}
+
+/* CAFE */
+function order(item){
+  saveOrder("طلب كافيه: "+item);
+  alert("تم الطلب");
+}
+
+/* NEWS */
 function addNews(){
-  if(localStorage.role!=="owner")return;
-  let n=JSON.parse(localStorage.news||"[]");
-  n.push(newsText.value);
-  localStorage.news=JSON.stringify(n);
+  if(localStorage.role!=="owner") return alert("مش مسموح");
+  const news=JSON.parse(localStorage.news||"[]");
+  news.unshift(newsText.value);
+  localStorage.news=JSON.stringify(news);
   newsText.value="";
+  renderNews();
+}
+
+function renderNews(){
+  newsList.innerHTML="";
+  const news=JSON.parse(localStorage.news||"[]");
+  news.forEach(n=>{
+    newsList.innerHTML+=`<div class="card">${n}</div>`;
+  });
+}
+
+/* NAV */
+function showPage(p){
+  document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));
+  document.getElementById(p+"Page").classList.remove("hidden");
+}
+
+/* LOGOUT */
+function logout(){
+  localStorage.clear();
+  location.reload();
+}
+
+if(localStorage.user){
+  loginBox.classList.add("hidden");
+  app.classList.remove("hidden");
+  renderRooms();
+  renderOrders();
+  renderNews();
 }
 </script>
 
