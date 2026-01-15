@@ -2,14 +2,13 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Queen Hotel</title>
+<title>Queen Hotel System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 *{box-sizing:border-box;font-family:Tahomа}
 body{
   margin:0;
-  min-height:100vh;
   background:linear-gradient(135deg,#050b2e,#000,#0a1cff);
   background-size:300% 300%;
   animation:bg 12s infinite;
@@ -20,19 +19,17 @@ body{
   50%{background-position:100% 50%}
   100%{background-position:0% 50%}
 }
-.wrap{max-width:480px;margin:auto;padding:15px}
 
-h2{text-align:center;margin:10px 0}
+.container{max-width:500px;margin:auto;padding:15px}
+h2{text-align:center;margin:15px 0}
 
 .card{
-  background:rgba(10,10,30,.85);
-  border-radius:16px;
-  padding:14px;
-  margin:10px 0;
-  box-shadow:0 0 25px #000;
-  transition:.3s;
+  background:#0a0f2a;
+  padding:15px;
+  border-radius:15px;
+  margin-bottom:12px;
+  box-shadow:0 0 20px #000;
 }
-.card:hover{transform:scale(1.02)}
 
 .room{
   display:flex;
@@ -41,7 +38,7 @@ h2{text-align:center;margin:10px 0}
   cursor:pointer;
 }
 .status{
-  padding:4px 10px;
+  padding:5px 12px;
   border-radius:20px;
   font-size:12px;
 }
@@ -49,104 +46,105 @@ h2{text-align:center;margin:10px 0}
 .booked{background:#ffab00}
 .busy{background:#d50000}
 
-button{
-  background:linear-gradient(135deg,#1e90ff,#003cff);
-  border:none;
-  color:#fff;
+input,textarea,select,button{
+  width:100%;
+  margin:6px 0;
   padding:10px;
-  border-radius:12px;
-  cursor:pointer;
+  border:none;
+  border-radius:10px;
+}
+button{
+  background:#1e90ff;
+  color:#fff;
   font-weight:bold;
+  cursor:pointer;
 }
 button:hover{opacity:.85}
 
+.small{font-size:12px;opacity:.8}
+
+/* Modal */
 .modal{
   position:fixed;
-  bottom:0;left:0;right:0;
-  background:#020015;
-  border-radius:20px 20px 0 0;
-  padding:18px;
+  inset:0;
+  background:rgba(0,0,0,.7);
   display:none;
-  box-shadow:0 -10px 30px #000;
+  align-items:center;
+  justify-content:center;
 }
-.modal input,textarea,select{
-  width:100%;
-  margin:5px 0;
-  padding:10px;
-  border-radius:10px;
-  border:none;
+.modal-box{
+  background:#020018;
+  padding:20px;
+  border-radius:20px;
+  width:90%;
+  max-width:400px;
 }
 .close{background:#d50000}
-
-.item{
-  background:#0a0f2a;
-  padding:10px;
-  border-radius:12px;
-  margin:6px 0;
-}
-.small{font-size:12px;opacity:.75}
 </style>
 </head>
 
 <body>
 
-<audio id="clickSound" src="https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3"></audio>
-<audio id="successSound" src="https://assets.mixkit.co/sfx/preview/mixkit-confirmation-tone-2867.mp3"></audio>
+<div class="container">
 
-<div class="wrap">
-
-<h2>🏨 حالة الغرف</h2>
+<h2>🏨 الغرف</h2>
 <div id="rooms"></div>
 
 <h2>☕ الكافيه</h2>
 <div class="card">
   <b>🥘 أكل</b>
-  <div id="food"></div>
+  <button onclick="orderCafe('برجر')">برجر</button>
+  <button onclick="orderCafe('بيتزا')">بيتزا</button>
   <b>🥤 مشروبات</b>
-  <div id="drinks"></div>
+  <button onclick="orderCafe('قهوة')">قهوة</button>
+  <button onclick="orderCafe('شاي')">شاي</button>
 </div>
 
-<h2>📜 السجل (الأخير)</h2>
-<div id="log"></div>
+<h2>📩 الطلبات</h2>
+<div id="orders"></div>
+
+<h2>📰 الأخبار</h2>
+<div class="card">
+  <input id="newsTitle" placeholder="عنوان الخبر">
+  <textarea id="newsText" placeholder="محتوى الخبر"></textarea>
+  <button onclick="addNews()">نشر الخبر</button>
+</div>
+<div id="newsList"></div>
 
 </div>
 
-<!-- MODAL -->
-<div id="roomModal" class="modal">
-  <h3 id="roomTitle"></h3>
-  <input id="custName" placeholder="اسم العميل">
-  <input id="people" type="number" placeholder="عدد الأفراد">
-  <input id="nights" type="number" placeholder="عدد الليالي">
-  <textarea id="notes" placeholder="ملاحظات"></textarea>
-  <select id="roomStatus">
-    <option value="booked">محجوزة</option>
-    <option value="busy">مؤجرة</option>
-    <option value="free">فاضية</option>
-  </select>
-  <button onclick="confirmRoom()">تأكيد</button>
-  <button class="close" onclick="closeModal()">إغلاق</button>
+<!-- Room Modal -->
+<div class="modal" id="roomModal">
+  <div class="modal-box">
+    <h3 id="roomTitle"></h3>
+    <input id="custName" placeholder="اسم العميل">
+    <input id="people" type="number" placeholder="عدد الأفراد">
+    <input id="nights" type="number" placeholder="عدد الليالي">
+    <select id="roomStatus">
+      <option value="free">فاضية</option>
+      <option value="booked">محجوزة</option>
+      <option value="busy">مؤجرة</option>
+    </select>
+    <button onclick="saveRoom()">حفظ</button>
+    <button class="close" onclick="closeModal()">إغلاق</button>
+  </div>
 </div>
 
 <script>
-const clickSound=document.getElementById("clickSound");
-const successSound=document.getElementById("successSound");
-
-function soundClick(){clickSound.play()}
-function soundSuccess(){successSound.play()}
-
-// إنشاء داتا لو مش موجودة (من غير مسح)
+/* ===== DATA INIT (من غير مسح) ===== */
 if(!localStorage.rooms){
   localStorage.rooms=JSON.stringify(
-    Array.from({length:4},(_,i)=>({id:i+1,status:"free"}))
+    Array.from({length:4},(_,i)=>({
+      id:i+1,status:"free",info:{}
+    }))
   );
 }
-if(!localStorage.log)localStorage.log="[]";
-
-const foodItems=["برجر","بيتزا","كشري","فراخ"];
-const drinkItems=["قهوة","شاي","مياه","بيبسي"];
+if(!localStorage.orders)localStorage.orders="[]";
+if(!localStorage.news)localStorage.news="[]";
 
 let currentRoom=null;
 
+/* ===== ROOMS ===== */
 function renderRooms(){
   const data=JSON.parse(localStorage.rooms);
   rooms.innerHTML="";
@@ -162,73 +160,87 @@ function renderRooms(){
 }
 
 function openRoom(id){
-  soundClick();
   currentRoom=id;
   roomTitle.innerText="غرفة "+id;
-  roomModal.style.display="block";
+  roomModal.style.display="flex";
 }
 
 function closeModal(){
   roomModal.style.display="none";
 }
 
-function confirmRoom(){
-  soundSuccess();
+function saveRoom(){
   const data=JSON.parse(localStorage.rooms);
-  const room=data.find(r=>r.id===currentRoom);
-  room.status=roomStatus.value;
+  const r=data.find(x=>x.id===currentRoom);
+  r.status=roomStatus.value;
+  r.info={
+    name:custName.value,
+    people:people.value,
+    nights:nights.value
+  };
   localStorage.rooms=JSON.stringify(data);
 
-  const logs=JSON.parse(localStorage.log);
-  logs.unshift(`غرفة ${currentRoom} ➜ ${roomStatus.value} | ${custName.value||"بدون اسم"}`);
-  localStorage.log=JSON.stringify(logs);
-
+  addOrder(`غرفة ${currentRoom} - ${r.status}`);
   closeModal();
 }
 
-function renderCafe(){
-  food.innerHTML="";
-  foodItems.forEach(i=>{
-    food.innerHTML+=`
-      <div class="item">
-        ${i}
-        <button onclick="addLog('طلب أكل: ${i}')">طلب</button>
+/* ===== CAFE ===== */
+function orderCafe(item){
+  addOrder("طلب كافيه: "+item);
+}
+
+/* ===== ORDERS ===== */
+function addOrder(text){
+  const o=JSON.parse(localStorage.orders);
+  o.unshift({text,time:new Date().toLocaleTimeString()});
+  localStorage.orders=JSON.stringify(o);
+  renderOrders();
+}
+
+function renderOrders(){
+  orders.innerHTML="";
+  JSON.parse(localStorage.orders).forEach(o=>{
+    orders.innerHTML+=`
+      <div class="card small">
+        ${o.text}<br>🕒 ${o.time}
       </div>`;
   });
+}
 
-  drinks.innerHTML="";
-  drinkItems.forEach(i=>{
-    drinks.innerHTML+=`
-      <div class="item">
-        ${i}
-        <button onclick="addLog('طلب مشروب: ${i}')">طلب</button>
+/* ===== NEWS ===== */
+function addNews(){
+  const n=JSON.parse(localStorage.news);
+  n.unshift({
+    title:newsTitle.value,
+    text:newsText.value
+  });
+  localStorage.news=JSON.stringify(n);
+  newsTitle.value="";
+  newsText.value="";
+  renderNews();
+}
+
+function renderNews(){
+  newsList.innerHTML="";
+  JSON.parse(localStorage.news).forEach(n=>{
+    newsList.innerHTML+=`
+      <div class="card">
+        <b>${n.title}</b>
+        <p class="small">${n.text}</p>
       </div>`;
   });
 }
 
-function addLog(text){
-  soundSuccess();
-  const logs=JSON.parse(localStorage.log);
-  logs.unshift(text);
-  localStorage.log=JSON.stringify(logs);
-}
-
-function renderLog(){
-  log.innerHTML="";
-  JSON.parse(localStorage.log).forEach(l=>{
-    log.innerHTML+=`<div class="item small">${l}</div>`;
-  });
-}
-
-// تحديث تلقائي كل 1 ثانية (زي ما طلبت)
+/* ===== AUTO UPDATE ===== */
 setInterval(()=>{
   renderRooms();
-  renderLog();
+  renderOrders();
+  renderNews();
 },1000);
 
-renderCafe();
 renderRooms();
-renderLog();
+renderOrders();
+renderNews();
 </script>
 
 </body>
