@@ -2,162 +2,76 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>UC Store</title>
+<title>Login Fixed</title>
 
 <style>
-*{box-sizing:border-box;font-family:Arial}
 body{
   margin:0;
-  min-height:100vh;
-  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-  color:#fff;
+  height:100vh;
   display:flex;
   justify-content:center;
   align-items:center;
+  background:#0f2027;
+  font-family:Arial;
 }
-
-/* ===== Login ===== */
-#login{
-  width:320px;
-  background:rgba(255,255,255,.15);
+.box{
+  background:#1f3b4d;
   padding:25px;
-  border-radius:16px;
+  border-radius:12px;
+  width:300px;
   text-align:center;
+  color:#fff;
 }
-#login input{
+input,button{
   width:100%;
   padding:12px;
   margin:8px 0;
   border:none;
-  border-radius:10px;
+  border-radius:8px;
 }
-#login button{
-  width:100%;
-  padding:12px;
-  border:none;
-  border-radius:20px;
+button{
   background:#00f5ff;
   font-weight:bold;
   cursor:pointer;
-  transition:.2s;
 }
-#login button:hover{transform:scale(1.05)}
-
-/* ===== App ===== */
-#app{
+#store{
   display:none;
-  width:90%;
-  max-width:600px;
-}
-.header{
-  margin-bottom:15px;
-}
-.card{
-  background:rgba(255,255,255,.15);
-  padding:15px;
-  border-radius:12px;
-  margin:10px 0;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-.buy{
-  background:#ffd166;
-  border:none;
-  padding:8px 18px;
-  border-radius:20px;
-  cursor:pointer;
-  transition:.2s;
-}
-.buy:hover{background:#ffe28a}
-.buy:active{transform:scale(.95)}
-
-.logout{
-  margin-top:15px;
-  background:#ff6b6b;
-  border:none;
-  padding:10px;
-  border-radius:20px;
-  width:100%;
-  cursor:pointer;
 }
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
-<div id="login">
+<div class="box" id="loginBox">
   <h3>تسجيل الدخول</h3>
-  <input id="username" placeholder="اسمك">
-  <button onclick="login()">دخول</button>
+  <input id="nameInput" placeholder="اسمك">
+  <button id="loginBtn">دخول</button>
 </div>
 
-<!-- APP -->
-<div id="app">
-  <div class="header">
-    <h2>🛒 UC STORE</h2>
-    <p id="welcome"></p>
-  </div>
-
-  <div class="card">
-    <span>60 UC</span>
-    <button class="buy" onclick="buy('60 UC')">شراء</button>
-  </div>
-  <div class="card">
-    <span>300 UC</span>
-    <button class="buy" onclick="buy('300 UC')">شراء</button>
-  </div>
-  <div class="card">
-    <span>600 UC</span>
-    <button class="buy" onclick="buy('600 UC')">شراء</button>
-  </div>
-
-  <button class="logout" onclick="logout()">🚪 خروج</button>
+<div class="box" id="store">
+  <h3>🛒 UC STORE</h3>
+  <p id="welcome"></p>
+  <p>60 UC</p>
+  <p>300 UC</p>
+  <p>600 UC</p>
+  <button onclick="location.reload()">خروج</button>
 </div>
-
-<!-- صوت خفيف -->
-<audio id="clickSound">
-  <source src="https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3">
-</audio>
 
 <script>
-function playSound(){
-  document.getElementById("clickSound").play();
-}
-
-function login(){
-  const u = username.value.trim();
-  if(u === ""){
+document.getElementById("loginBtn").onclick = function(){
+  var name = document.getElementById("nameInput").value;
+  if(name === ""){
     alert("اكتب اسمك");
     return;
   }
-  localStorage.setItem("user", u);
-  startApp();
-}
 
-function startApp(){
-  login.style.display="none";
-  app.style.display="block";
-  welcome.innerText = "أهلاً " + localStorage.getItem("user");
-}
+  // إخفاء تسجيل الدخول
+  document.getElementById("loginBox").style.display = "none";
 
-function buy(item){
-  playSound();
-  alert("تم اختيار " + item + " (تجريبي)");
-}
-
-function logout(){
-  localStorage.clear();
-  location.reload();
-}
-
-// دخول تلقائي
-window.onload = function(){
-  if(localStorage.getItem("user")){
-    startApp();
-  }
-}
+  // إظهار المتجر
+  document.getElementById("store").style.display = "block";
+  document.getElementById("welcome").innerText = "أهلاً " + name;
+};
 </script>
 
 </body>
