@@ -3,60 +3,89 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Queen Hotel</title>
+<title>QUEEN System</title>
 
 <style>
+*{box-sizing:border-box;font-family:Tajawal, Tahoma}
 body{
   margin:0;
-  font-family:Tahoma;
-  background:linear-gradient(270deg,#000,#001a33,#000);
-  background-size:400% 400%;
-  animation:bg 12s ease infinite;
+  min-height:100vh;
+  background:
+    radial-gradient(circle at top,#0a3d62,#020824 60%),
+    linear-gradient(270deg,#000,#001a33,#000);
+  background-size:200% 200%;
+  animation:bgMove 15s ease infinite;
   color:#fff;
 }
-@keyframes bg{
+@keyframes bgMove{
   0%{background-position:0% 50%}
   50%{background-position:100% 50%}
   100%{background-position:0% 50%}
 }
 
-.wrap{max-width:420px;margin:auto;padding:15px}
-.box{background:rgba(0,0,0,.85);padding:20px;border-radius:18px}
+.wrap{max-width:430px;margin:auto;padding:15px}
+.box{
+  background:rgba(0,0,0,.75);
+  padding:20px;
+  border-radius:18px;
+  box-shadow:0 0 30px rgba(0,120,255,.25);
+}
 
-h1{
+.logo{
   text-align:center;
-  color:red;
+  font-size:30px;
+  color:#ff2d2d;
   animation:glow 2s infinite alternate;
+  margin-bottom:10px;
 }
 @keyframes glow{
-  from{text-shadow:0 0 5px red}
-  to{text-shadow:0 0 20px red}
+  from{text-shadow:0 0 5px #ff2d2d}
+  to{text-shadow:0 0 20px #ff2d2d}
 }
 
-input,button,textarea{
+input,select,button,textarea{
   width:100%;
-  padding:12px;
+  padding:13px;
   margin:6px 0;
   border:none;
-  border-radius:10px;
+  border-radius:12px;
   font-size:14px;
 }
-button{background:#0066ff;color:#fff;font-weight:bold;cursor:pointer}
+input,textarea,select{background:#020d1f;color:#fff}
+button{
+  background:#1e90ff;
+  color:#fff;
+  font-weight:bold;
+  cursor:pointer;
+}
+button.red{background:#c0392b}
 
-.nav{display:flex;gap:5px;margin-bottom:10px}
+.nav{
+  display:flex;
+  gap:6px;
+  margin-bottom:10px;
+}
 .nav button{flex:1}
 
 .section{display:none}
 .section.active{display:block}
 
 .item{
-  background:#002244;
+  background:#020d1f;
   padding:12px;
-  border-radius:10px;
+  border-radius:12px;
   margin:6px 0;
-  cursor:pointer;
 }
+
 .small{font-size:12px;opacity:.8}
+
+/* فورم جانبي */
+.sideForm{
+  background:#00162e;
+  padding:15px;
+  border-radius:14px;
+  margin-top:10px;
+}
 </style>
 </head>
 
@@ -66,9 +95,9 @@ button{background:#0066ff;color:#fff;font-weight:bold;cursor:pointer}
 <div id="loginBox">
   <div class="wrap">
     <div class="box">
-      <h1>QUEEN HOTEL</h1>
+      <div class="logo">QUEEN</div>
       <input id="nameInput" placeholder="اسمك">
-      <input id="codeInput" placeholder="كود الموظف (اختياري)">
+      <input id="codeInput" placeholder="كود الصلاحية (اختياري)">
       <button onclick="login()">دخول</button>
     </div>
   </div>
@@ -89,6 +118,7 @@ button{background:#0066ff;color:#fff;font-weight:bold;cursor:pointer}
     <div id="rooms" class="section active">
       <h3>الغرف</h3>
       <div id="roomsList"></div>
+      <div id="roomForm"></div>
     </div>
 
     <!-- NEWS -->
@@ -111,19 +141,21 @@ button{background:#0066ff;color:#fff;font-weight:bold;cursor:pointer}
 </div>
 
 <script>
-const CODES = {
+/* ===== CODES ===== */
+const CODES={
   "QUEEN-HOTEL":"hotel",
   "QUEEN-CAFE":"cafe",
   "QUEEN-OWNER":"owner"
 };
 
+/* ===== LOGIN ===== */
 function login(){
-  const name = nameInput.value.trim();
-  if(!name) return alert("اكتب اسمك");
+  const name=nameInput.value.trim();
+  if(!name){alert("اكتب اسمك");return;}
 
-  let role = "client";
+  let role="client";
   if(codeInput.value && CODES[codeInput.value]){
-    role = CODES[codeInput.value];
+    role=CODES[codeInput.value];
   }
 
   localStorage.setItem("user",name);
@@ -131,19 +163,21 @@ function login(){
   start();
 }
 
+/* ===== START ===== */
 function start(){
   loginBox.style.display="none";
   app.style.display="block";
 
-  if(localStorage.role!="client"){
+  if(localStorage.role!=="client"){
     ordersBtn.style.display="block";
   }
-  if(localStorage.role=="hotel" || localStorage.role=="owner"){
+  if(localStorage.role==="hotel"||localStorage.role==="owner"){
     newsForm.style.display="block";
   }
   renderAll();
 }
 
+/* ===== NAV ===== */
 function show(id){
   document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
@@ -161,29 +195,49 @@ function renderRooms(){
 }
 
 function openRoom(num){
-  const role = localStorage.role;
-  if(role=="client"){
-    const name = prompt("اسم العميل");
-    if(!name) return;
-    saveOrder("حجز غرفة",`غرفة ${num}`,name);
-    alert("تم إرسال طلب الحجز");
-  }else{
-    alert("موظف – لا يمكن الحجز");
+  if(localStorage.role!=="client"){
+    alert("الحجز للعملاء فقط");
+    return;
   }
+  roomForm.innerHTML=`
+    <div class="sideForm">
+      <h4>حجز غرفة ${num}</h4>
+      <input id="phone" placeholder="رقم الهاتف">
+      <input id="from" type="date">
+      <input id="to" type="date">
+      <button onclick="sendBooking(${num})">إرسال</button>
+    </div>
+  `;
+}
+
+function sendBooking(room){
+  if(!phone.value||!from.value||!to.value){
+    alert("كمل البيانات");
+    return;
+  }
+  saveOrder("حجز غرفة","غرفة "+room,localStorage.user);
+  alert("تم الإرسال");
+  roomForm.innerHTML="";
 }
 
 /* ===== ORDERS ===== */
 function saveOrder(type,item,user){
-  const orders = JSON.parse(localStorage.getItem("orders")||"[]");
-  orders.push({type,item,user,time:new Date().toLocaleString()});
-  localStorage.setItem("orders",JSON.stringify(orders));
+  const arr=JSON.parse(localStorage.getItem("orders")||"[]");
+  arr.push({type,item,user,time:new Date().toLocaleString()});
+  localStorage.setItem("orders",JSON.stringify(arr));
   renderOrders();
 }
 
 function renderOrders(){
   ordersList.innerHTML="";
-  const orders = JSON.parse(localStorage.getItem("orders")||"[]");
-  orders.forEach(o=>{
+  const role=localStorage.role;
+  const arr=JSON.parse(localStorage.getItem("orders")||"[]");
+
+  arr.forEach(o=>{
+    if(role==="hotel" && o.type!=="حجز غرفة")return;
+    if(role==="cafe" && o.type!=="طلب كافيه")return;
+    if(role==="client")return;
+
     ordersList.innerHTML+=`
       <div class="item small">
         ${o.type} | ${o.item} | ${o.user}<br>${o.time}
@@ -193,26 +247,33 @@ function renderOrders(){
 
 /* ===== NEWS ===== */
 function addNews(){
-  const txt = newsText.value.trim();
-  if(!txt) return;
-  const news = JSON.parse(localStorage.getItem("news")||"[]");
-  news.unshift(txt);
-  localStorage.setItem("news",JSON.stringify(news));
+  if(!newsText.value)return;
+  const n=JSON.parse(localStorage.getItem("news")||"[]");
+  n.unshift(newsText.value);
+  localStorage.setItem("news",JSON.stringify(n));
   newsText.value="";
   renderNews();
 }
 function renderNews(){
   newsList.innerHTML="";
-  const news = JSON.parse(localStorage.getItem("news")||"[]");
-  news.forEach(n=>newsList.innerHTML+=`<div class="item">${n}</div>`);
+  const n=JSON.parse(localStorage.getItem("news")||"[]");
+  n.forEach(x=>newsList.innerHTML+=`<div class="item">${x}</div>`);
 }
 
+/* ===== RENDER ALL ===== */
 function renderAll(){
   renderRooms();
   renderOrders();
   renderNews();
 }
 
+/* 🔄 تحديث تلقائي */
+setInterval(()=>{
+  if(localStorage.role!=="client") renderOrders();
+  renderNews();
+},2000);
+
+/* ===== LOGOUT ===== */
 function logout(){
   localStorage.clear();
   location.reload();
