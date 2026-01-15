@@ -2,7 +2,7 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>EYAD ABO GAD</title>
+<title>EYAD UC STORE</title>
 
 <style>
 *{box-sizing:border-box;font-family:Arial}
@@ -12,8 +12,9 @@ body{
   background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
   color:#fff;
 }
+.hidden{display:none}
 
-/* ===== LOGIN ===== */
+/* LOGIN */
 #login{
   height:100vh;
   display:flex;
@@ -27,8 +28,6 @@ body{
   border-radius:16px;
   text-align:center;
 }
-
-/* animated title */
 .title{
   font-size:32px;
   font-weight:bold;
@@ -44,52 +43,33 @@ body{
   50%{background-position:100% 50%}
   100%{background-position:0% 50%}
 }
-
-.login-box input,
-.login-box button{
-  width:100%;
-  padding:12px;
-  margin:8px 0;
-  border:none;
-  border-radius:10px;
+.login-box input,.login-box button{
+  width:100%;padding:12px;margin:8px 0;border:none;border-radius:10px;
 }
-.login-box button{
-  background:#00f5ff;
-  font-weight:bold;
-  cursor:pointer;
-}
+.login-box button{background:#00f5ff;font-weight:bold;cursor:pointer}
 
-/* ===== APP ===== */
+/* APP */
 #app{display:none;height:100vh}
 .app{display:flex;height:100%}
 
-/* sidebar */
+/* SIDEBAR */
 .sidebar{
   width:220px;
   background:#102a36;
   padding:15px;
 }
-.sidebar h3{text-align:center;margin-bottom:15px}
 .sidebar button{
-  width:100%;
-  margin:6px 0;
-  padding:10px;
-  border:none;
-  border-radius:10px;
-  background:#00f5ff;
-  font-weight:bold;
-  cursor:pointer;
+  width:100%;margin:6px 0;padding:10px;
+  border:none;border-radius:10px;
+  background:#00f5ff;font-weight:bold;cursor:pointer;
 }
 
-/* content */
-.content{
-  flex:1;
-  padding:20px;
-}
+/* CONTENT */
+.content{flex:1;padding:20px}
 .section{display:none}
 .section.active{display:block}
 
-/* cards */
+/* CARDS */
 .card{
   background:#1f3b4d;
   padding:15px;
@@ -99,21 +79,22 @@ body{
   justify-content:space-between;
   align-items:center;
 }
-.buy{
-  background:#ffd166;
-  border:none;
-  padding:8px 18px;
-  border-radius:20px;
-  cursor:pointer;
-}
+.buy{background:#ffd166;border:none;padding:8px 18px;border-radius:20px}
 
-/* footer */
+/* USERS LIST */
+.user{
+  background:#0f2027;
+  padding:10px;
+  margin:6px 0;
+  border-radius:10px;
+  display:flex;
+  justify-content:space-between;
+}
+select{border-radius:6px}
+
+/* FOOTER */
 .footer{
-  position:fixed;
-  bottom:6px;
-  right:10px;
-  font-size:12px;
-  opacity:.7;
+  position:fixed;bottom:6px;right:10px;font-size:12px;opacity:.7;
 }
 </style>
 </head>
@@ -124,87 +105,112 @@ body{
 <div id="login">
   <div class="login-box">
     <div class="title">EYAD UC STORE</div>
-
     <input id="username" placeholder="اسمك">
     <input id="code" placeholder="كود الأونر (اختياري)">
     <button onclick="login()">دخول</button>
-
     <small>Developer: Eyad Abo Gad</small>
   </div>
 </div>
 
 <!-- APP -->
 <div id="app">
-  <div class="app">
+<div class="app">
 
-    <div class="sidebar">
-      <h3>القائمة</h3>
-      <button onclick="openSec('store')">🛒 المتجر</button>
-      <button onclick="openSec('tickets')">🧾 الشكاوي</button>
-      <button id="ownerBtn" style="display:none" onclick="openSec('admin')">👑 الإدارة</button>
-      <button onclick="logout()">🚪 خروج</button>
-    </div>
-
-    <div class="content">
-
-      <!-- STORE -->
-      <div id="store" class="section active">
-        <h2 id="welcome"></h2>
-
-        <div class="card"><span>60 UC</span><button class="buy">شراء</button></div>
-        <div class="card"><span>300 UC</span><button class="buy">شراء</button></div>
-        <div class="card"><span>600 UC</span><button class="buy">شراء</button></div>
-      </div>
-
-      <!-- TICKETS -->
-      <div id="tickets" class="section">
-        <h3>الشكاوي</h3>
-        <p>قريبًا…</p>
-      </div>
-
-      <!-- ADMIN -->
-      <div id="admin" class="section">
-        <h3>لوحة الأونر</h3>
-        <p>تحكم كامل</p>
-      </div>
-
-    </div>
-  </div>
+<div class="sidebar">
+  <button onclick="openSec('store')">🛒 المتجر</button>
+  <button onclick="openSec('tickets')">🧾 الشكاوي</button>
+  <button id="adminBtn" class="hidden" onclick="openSec('admin')">👑 الإدارة</button>
+  <button onclick="logout()">🚪 خروج</button>
 </div>
+
+<div class="content">
+
+<div id="store" class="section active">
+  <h2 id="welcome"></h2>
+  <div class="card"><span>60 UC</span><button class="buy">شراء</button></div>
+  <div class="card"><span>300 UC</span><button class="buy">شراء</button></div>
+  <div class="card"><span>600 UC</span><button class="buy">شراء</button></div>
+</div>
+
+<div id="tickets" class="section">
+  <h3>الشكاوي</h3>
+  <p>قريبًا…</p>
+</div>
+
+<div id="admin" class="section">
+  <h3>لوحة الأونر</h3>
+  <div id="usersList"></div>
+</div>
+
+</div>
+</div>
+</div>
+
+<audio id="clickSound" src="https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3"></audio>
 
 <div class="footer">© Eyad Abo Gad</div>
 
 <script>
 const OWNER_CODE="OWNER-999";
 
-/* LOGIN FIXED */
+/* USERS */
+let users = JSON.parse(localStorage.getItem("users")||"[]");
+
+/* LOGIN */
 function login(){
   let u=username.value.trim();
-  if(!u){ alert("اكتب اسمك"); return; }
+  if(!u) return alert("اكتب اسمك");
+
+  let role = (code.value===OWNER_CODE)?"Owner":"Player";
+
+  if(!users.find(x=>x.name===u)){
+    users.push({name:u,role:role});
+    localStorage.setItem("users",JSON.stringify(users));
+  }
 
   localStorage.user=u;
-  localStorage.role=(code.value===OWNER_CODE)?"Owner":"Player";
-
-  loginPage();
+  localStorage.role=role;
+  showApp();
 }
 
-function loginPage(){
-  document.getElementById("login").style.display="none";
-  document.getElementById("app").style.display="block";
-
+/* APP */
+function showApp(){
+  login.style.display="none";
+  app.style.display="block";
   welcome.innerText="أهلاً "+localStorage.user;
 
   if(localStorage.role==="Owner"){
-    ownerBtn.style.display="block";
+    adminBtn.classList.remove("hidden");
+    renderUsers();
   }
+  openSec("store");
+}
 
-  openSec("store"); // ← ده الإصلاح المهم
+/* USERS LIST */
+function renderUsers(){
+  usersList.innerHTML="";
+  users.forEach((u,i)=>{
+    usersList.innerHTML+=`
+    <div class="user">
+      <span>${u.name}</span>
+      <select onchange="setRole(${i},this.value)">
+        <option ${u.role=="Player"?"selected":""}>Player</option>
+        <option ${u.role=="Helper"?"selected":""}>Helper</option>
+        <option ${u.role=="Admin"?"selected":""}>Admin</option>
+      </select>
+    </div>`;
+  });
+}
+function setRole(i,val){
+  users[i].role=val;
+  localStorage.setItem("users",JSON.stringify(users));
 }
 
 /* NAV */
 function openSec(id){
   document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
+  clickSound.play();
 }
 
 /* LOGOUT */
@@ -213,14 +219,11 @@ function logout(){
   location.reload();
 }
 
-/* AUTO LOGIN */
+/* AUTO */
 window.onload=()=>{
-  if(localStorage.user){
-    loginPage();
-  }
-};
+  if(localStorage.user) showApp();
+}
 </script>
 
 </body>
 </html>
-
