@@ -9,11 +9,11 @@
 body{
   margin:0;
   height:100vh;
-  background:#0f2027;
+  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
   color:#fff;
 }
 
-/* ===== LOGIN ===== */
+/* LOGIN */
 #login{
   height:100vh;
   display:flex;
@@ -21,7 +21,7 @@ body{
   align-items:center;
 }
 .login-box{
-  width:320px;
+  width:330px;
   background:#1f3b4d;
   padding:25px;
   border-radius:14px;
@@ -41,28 +41,17 @@ body{
   cursor:pointer;
 }
 
-/* ===== APP ===== */
-#app{
-  display:none;
-  height:100vh;
-}
+/* APP */
+#app{display:none;height:100vh}
+.app{display:flex;height:100%}
 
-/* Layout */
-.app{
-  display:flex;
-  height:100%;
-}
-
-/* Sidebar */
+/* SIDEBAR */
 .sidebar{
-  width:220px;
+  width:230px;
   background:#102a36;
   padding:15px;
 }
-.sidebar h3{
-  text-align:center;
-  margin-bottom:20px;
-}
+.sidebar h3{text-align:center;margin-bottom:20px}
 .sidebar button{
   width:100%;
   margin:6px 0;
@@ -74,11 +63,11 @@ body{
   cursor:pointer;
 }
 
-/* Content */
-.content{
-  flex:1;
-  padding:20px;
-}
+/* CONTENT */
+.content{flex:1;padding:20px}
+.section{display:none}
+.section.active{display:block}
+
 .card{
   background:#1f3b4d;
   padding:15px;
@@ -95,6 +84,28 @@ body{
   border-radius:20px;
   cursor:pointer;
 }
+
+/* CHAT */
+.chat{
+  background:#0f2027;
+  padding:10px;
+  border-radius:10px;
+  height:200px;
+  overflow:auto;
+  margin-bottom:8px;
+}
+.msg{margin:4px 0}
+.me{color:#00f5ff}
+.admin{color:#ffd166}
+
+/* FOOTER */
+.footer{
+  position:fixed;
+  bottom:5px;
+  right:10px;
+  font-size:12px;
+  opacity:.7;
+}
 </style>
 </head>
 
@@ -105,7 +116,9 @@ body{
   <div class="login-box">
     <h3>تسجيل الدخول</h3>
     <input id="username" placeholder="اسمك">
+    <input id="code" placeholder="كود الأونر (اختياري)">
     <button onclick="login()">دخول</button>
+    <small>Developer: Eyad Abo Gad</small>
   </div>
 </div>
 
@@ -116,63 +129,147 @@ body{
     <!-- SIDEBAR -->
     <div class="sidebar">
       <h3>UC STORE</h3>
-      <button>🛒 المتجر</button>
-      <button disabled>🧾 الشكاوي</button>
+      <button onclick="openSec('store')">🛒 المتجر</button>
+      <button onclick="openSec('tickets')">🧾 الشكاوي</button>
+      <button id="ownerBtn" style="display:none" onclick="openSec('admin')">👑 الإدارة</button>
       <button onclick="logout()">🚪 خروج</button>
     </div>
 
     <!-- CONTENT -->
     <div class="content">
-      <h2 id="welcome"></h2>
 
-      <div class="card">
-        <span>60 UC</span>
-        <button class="buy">شراء</button>
+      <!-- STORE -->
+      <div id="store" class="section active">
+        <h2 id="welcome"></h2>
+        <div class="card"><span>60 UC</span><button class="buy" onclick="sound()">شراء</button></div>
+        <div class="card"><span>300 UC</span><button class="buy" onclick="sound()">شراء</button></div>
+        <div class="card"><span>600 UC</span><button class="buy" onclick="sound()">شراء</button></div>
       </div>
-      <div class="card">
-        <span>300 UC</span>
-        <button class="buy">شراء</button>
+
+      <!-- TICKETS -->
+      <div id="tickets" class="section">
+        <h3>🧾 الشكاوي</h3>
+        <input id="ticketText" placeholder="اكتب الشكوى">
+        <button onclick="newTicket()">فتح شكوى</button>
+        <div id="myTickets"></div>
       </div>
-      <div class="card">
-        <span>600 UC</span>
-        <button class="buy">شراء</button>
+
+      <!-- ADMIN -->
+      <div id="admin" class="section">
+        <h3>👑 لوحة الإدارة</h3>
+        <div id="allTickets"></div>
       </div>
+
+      <!-- CHAT -->
+      <div id="chat" class="section">
+        <h3>💬 روم الشكوى</h3>
+        <div class="chat" id="chatBox"></div>
+        <input id="chatMsg" placeholder="اكتب رسالة">
+        <button onclick="sendMsg()">إرسال</button>
+      </div>
+
     </div>
-
   </div>
 </div>
 
+<div class="footer">© Developed by Eyad Abo Gad</div>
+
+<audio id="clickSound">
+  <source src="https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3">
+</audio>
+
 <script>
-function login(){
-  let u = document.getElementById("username").value.trim();
-  if(u === ""){
-    alert("اكتب اسمك");
-    return;
-  }
+const OWNER_CODE="OWNER-999";
+let currentTicket=null;
 
-  // حفظ الاسم فقط (بسيط)
-  localStorage.setItem("user", u);
-
-  // إظهار التطبيق
-  document.getElementById("login").style.display="none";
-  document.getElementById("app").style.display="block";
-  document.getElementById("welcome").innerText = "أهلاً " + u;
+/* SOUND */
+function sound(){
+  document.getElementById("clickSound").play();
 }
 
+/* LOGIN */
+function login(){
+  let u=username.value.trim();
+  if(!u)return alert("اكتب اسمك");
+
+  let role = (code.value===OWNER_CODE)?"Owner":"Player";
+  localStorage.user=u;
+  localStorage.role=role;
+
+  start();
+}
+
+function start(){
+  login.style.display="none";
+  app.style.display="block";
+  welcome.innerText="أهلاً "+localStorage.user;
+
+  if(localStorage.role==="Owner"){
+    ownerBtn.style.display="block";
+  }
+}
+
+/* NAV */
+function openSec(id){
+  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+/* TICKETS */
+function newTicket(){
+  let t=ticketText.value.trim();
+  if(!t)return;
+  let arr=JSON.parse(localStorage.tickets||"[]");
+  arr.push({id:Date.now(),user:localStorage.user,msgs:[{from:"me",text:t}]});
+  localStorage.tickets=JSON.stringify(arr);
+  ticketText.value="";
+  loadMyTickets();
+}
+
+function loadMyTickets(){
+  let arr=JSON.parse(localStorage.tickets||"[]");
+  myTickets.innerHTML="";
+  arr.filter(x=>x.user===localStorage.user)
+     .forEach(t=>myTickets.innerHTML+=`<div onclick="openChat(${t.id})">شكوى #${t.id}</div>`);
+}
+
+function loadAllTickets(){
+  let arr=JSON.parse(localStorage.tickets||"[]");
+  allTickets.innerHTML="";
+  arr.forEach(t=>allTickets.innerHTML+=`<div onclick="openChat(${t.id})">${t.user} - #${t.id}</div>`);
+}
+
+function openChat(id){
+  currentTicket=id;
+  openSec("chat");
+  renderChat();
+}
+
+function renderChat(){
+  let arr=JSON.parse(localStorage.tickets);
+  let t=arr.find(x=>x.id===currentTicket);
+  chatBox.innerHTML="";
+  t.msgs.forEach(m=>chatBox.innerHTML+=`<div class="msg ${m.from}">${m.text}</div>`);
+}
+
+function sendMsg(){
+  let txt=chatMsg.value.trim();
+  if(!txt)return;
+  let arr=JSON.parse(localStorage.tickets);
+  let t=arr.find(x=>x.id===currentTicket);
+  t.msgs.push({from:localStorage.role==="Owner"?"admin":"me",text:txt});
+  localStorage.tickets=JSON.stringify(arr);
+  chatMsg.value="";
+  renderChat();
+}
+
+/* LOGOUT */
 function logout(){
   localStorage.clear();
   location.reload();
 }
 
-// دخول تلقائي
-window.onload = function(){
-  let u = localStorage.getItem("user");
-  if(u){
-    document.getElementById("login").style.display="none";
-    document.getElementById("app").style.display="block";
-    document.getElementById("welcome").innerText = "أهلاً " + u;
-  }
-}
+window.onload=()=>localStorage.user&&start();
 </script>
 
 </body>
