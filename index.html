@@ -2,7 +2,7 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>UC Store System</title>
+<title>UC Store</title>
 
 <style>
 *{box-sizing:border-box;font-family:Arial}
@@ -22,7 +22,7 @@ body{
 }
 .login-box{
   width:340px;
-  background:rgba(255,255,255,.12);
+  background:rgba(255,255,255,.15);
   padding:25px;
   border-radius:18px;
   text-align:center;
@@ -41,6 +41,7 @@ body{
   border-radius:20px;
   background:#00f5ff;
   font-weight:bold;
+  cursor:pointer;
 }
 
 /* App */
@@ -76,38 +77,34 @@ body{
 
 /* Cards */
 .card{
-  background:rgba(255,255,255,.1);
+  background:rgba(255,255,255,.12);
   padding:15px;
   border-radius:12px;
   margin:10px 0;
-  cursor:pointer;
 }
-
-/* Owner panel */
-.user-card{
-  background:rgba(255,255,255,.12);
+.buy{
   padding:10px;
-  border-radius:10px;
-  margin:8px 0;
-}
-.actions button{
-  margin:4px;
-  padding:6px 10px;
+  width:100%;
   border:none;
-  border-radius:8px;
-  cursor:pointer;
+  border-radius:20px;
+  background:#ffd166;
+  font-weight:bold;
 }
 </style>
 </head>
 
 <body>
 
+<!-- Sounds -->
+<audio id="clickSound" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
+<audio id="loginSound" src="https://assets.mixkit.co/active_storage/sfx/1120/1120-preview.mp3"></audio>
+
 <!-- LOGIN -->
 <div id="login">
   <div class="login-box">
     <h2>تسجيل الدخول</h2>
     <input id="user" placeholder="الاسم أو الإيميل">
-    <input id="code" placeholder="كود الأونر (لو موجود)">
+    <input id="code" placeholder="كود الأونر (اختياري)">
     <button onclick="login()">دخول</button>
   </div>
 </div>
@@ -126,20 +123,19 @@ body{
 
     <!-- STORE -->
     <div id="store" class="section active">
-      <div class="card">60 UC</div>
-      <div class="card">300 UC</div>
-      <div class="card">600 UC</div>
+      <div class="card">60 UC <button class="buy">شراء</button></div>
+      <div class="card">300 UC <button class="buy">شراء</button></div>
+      <div class="card">600 UC <button class="buy">شراء</button></div>
     </div>
 
     <!-- TICKETS -->
     <div id="ticket" class="section">
-      <h3>فتح شكوى</h3>
-      <input id="tmsg" placeholder="اكتب مشكلتك">
+      <input id="tmsg" placeholder="اكتب الشكوى">
       <button onclick="sendTicket()">إرسال</button>
       <div id="tickets"></div>
     </div>
 
-    <!-- USERS (OWNER ONLY) -->
+    <!-- USERS -->
     <div id="users" class="section">
       <h3>إدارة الناس</h3>
       <div id="userList"></div>
@@ -150,29 +146,40 @@ body{
 <script>
 const OWNER_CODE="OWNER-999";
 
+function play(id){document.getElementById(id).play();}
+
 function login(){
-  let u=user.value.trim(), c=code.value.trim();
+  play("loginSound");
+  let u=user.value.trim();
+  let c=code.value.trim();
   if(!u)return alert("اكتب الاسم");
 
   let role="Player";
   if(c){
-    if(c!==OWNER_CODE)return alert("كود غير صحيح");
+    if(c!==OWNER_CODE)return alert("كود الأونر غلط");
     role="Owner";
+  }
+
+  let users=JSON.parse(localStorage.users||"[]");
+  if(!users.find(x=>x.name===u)){
+    users.push({name:u,role:role,banned:false});
+    localStorage.users=JSON.stringify(users);
   }
 
   localStorage.user=u;
   localStorage.role=role;
-
-  let users=JSON.parse(localStorage.users||"[]");
-  if(!users.find(x=>x.name===u)){
-    users.push({name:u,role:"Player",banned:false});
-    localStorage.users=JSON.stringify(users);
-  }
-
   start();
 }
 
 function start(){
+  let users=JSON.parse(localStorage.users||"[]");
+  let me=users.find(x=>x.name===localStorage.user);
+  if(me && me.banned){
+    alert("أنت محظور");
+    localStorage.clear();
+    return;
+  }
+
   login.style.display="none";
   app.classList.remove("hidden");
   username.innerText=localStorage.user;
@@ -184,9 +191,10 @@ function start(){
   renderUsers();
 }
 
-function logout(){localStorage.removeItem("user");localStorage.removeItem("role");location.reload();}
+function logout(){localStorage.clear();location.reload();}
 
 function openSec(id,btn){
+  play("clickSound");
   document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
   document.querySelectorAll(".nav").forEach(b=>b.classList.remove("active"));
@@ -202,21 +210,19 @@ function sendTicket(){
 
 function renderUsers(){
   if(localStorage.role!=="Owner")return;
-  let box=document.getElementById("userList");
-  let users=JSON.parse(localStorage.users||"[]");
+  let box=userList;
   box.innerHTML="";
+  let users=JSON.parse(localStorage.users||"[]");
   users.forEach(u=>{
     box.innerHTML+=`
-      <div class="user-card">
-        <b>${u.name}</b> | ${u.role}
-        <div class="actions">
-          <button onclick="setRole('${u.name}','Helper')">توظيف</button>
-          <button onclick="setRole('${u.name}','Admin')">ترقية</button>
-          <button onclick="setRole('${u.name}','Player')">فصل</button>
-          <button onclick="ban('${u.name}')">حظر</button>
-        </div>
-      </div>
-    `;
+      <div class="card">
+        ${u.name} | ${u.role}
+        <br>
+        <button onclick="setRole('${u.name}','Helper')">توظيف</button>
+        <button onclick="setRole('${u.name}','Admin')">ترقية</button>
+        <button onclick="setRole('${u.name}','Player')">فصل</button>
+        <button onclick="ban('${u.name}')">حظر</button>
+      </div>`;
   });
 }
 
@@ -231,7 +237,6 @@ function ban(name){
   let users=JSON.parse(localStorage.users);
   users.forEach(u=>{if(u.name===name)u.banned=true});
   localStorage.users=JSON.stringify(users);
-  alert("تم الحظر");
   renderUsers();
 }
 
