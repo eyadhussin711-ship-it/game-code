@@ -5,156 +5,65 @@
 <title>Queen Hotel</title>
 
 <style>
-*{box-sizing:border-box;font-family:Tahoma}
 body{
   margin:0;height:100vh;
-  background:linear-gradient(135deg,#000,#1a0000,#000);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:#000;
   color:#fff;
+  font-family:Tahoma;
 }
-
-/* LOGIN */
-#login{
-  height:100vh;display:flex;
-  justify-content:center;align-items:center;
-}
-.login-box{
-  width:380px;
-  background:rgba(0,0,0,.8);
-  padding:30px;border-radius:20px;
+.box{
+  background:#1a0000;
+  padding:30px;
+  border-radius:15px;
+  width:340px;
   text-align:center;
 }
-.title{
-  font-size:40px;font-weight:900;
-  color:#ff0000;margin-bottom:10px;
+h1{
+  color:red;
 }
-.note{
-  font-size:13px;
-  color:#ff8080;
-  margin-bottom:15px;
-}
-
-/* inputs */
 input,button{
   width:100%;
-  padding:14px;
+  padding:12px;
   margin:8px 0;
   border:none;
-  border-radius:12px;
-  font-size:16px;
+  border-radius:10px;
 }
 button{
-  background:#ff0000;
-  color:#fff;
+  background:red;
+  color:white;
   font-weight:bold;
   cursor:pointer;
 }
-
-/* APP */
-#app{display:none;height:100vh}
-.app{display:flex;height:100%}
-
-/* SIDEBAR */
-.sidebar{
-  width:230px;background:#0a0000;
-  padding:15px;border-left:2px solid #ff0000;
-}
-.sidebar h3{color:#ff0000;text-align:center}
-.sidebar button{
-  width:100%;margin:6px 0;padding:12px;
-  border:none;border-radius:10px;
-  background:#ff0000;color:#fff;font-weight:bold;
-}
-
-/* CONTENT */
-.content{flex:1;padding:25px}
-.section{display:none}
-.section.active{display:block}
-
-/* ITEMS */
-.item{
-  background:#1f0000;
-  padding:10px;margin:6px 0;
-  border-radius:10px;
-  display:flex;
-  justify-content:space-between;
-}
-
-/* FOOTER */
-.footer{
-  position:fixed;bottom:8px;left:12px;
-  font-size:12px;opacity:.7;
-}
+#app{display:none}
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
-<div id="login">
-  <div class="login-box">
-    <div class="title">QUEEN HOTEL</div>
-    <div class="note">🚫 ممنوع الكتابة هنا إلا الاسم فقط</div>
-    <input id="username" placeholder="اكتب اسمك">
-    <input id="secret" placeholder="الكود السري (للموظفين فقط)">
-    <button onclick="login()">دخول</button>
-    <small>تطوير: إياد أبو جاد</small>
-  </div>
+<div id="login" class="box">
+  <h1>QUEEN HOTEL</h1>
+  <p>🚫 ممنوع الكتابة – اكتب الاسم فقط</p>
+  <input id="username" placeholder="اسمك">
+  <input id="secret" placeholder="الكود السري (للموظفين)">
+  <button onclick="login()">دخول</button>
 </div>
 
-<!-- APP -->
-<div id="app">
-<div class="app">
-
-<div class="sidebar">
-  <h3>Queen Hotel</h3>
-  <button onclick="openSec('hotel')">🏨 الفندق</button>
-  <button onclick="openSec('cafe')">☕ الكافيه</button>
-  <button id="staffBtn" style="display:none" onclick="openSec('orders')">🧾 الطلبات</button>
-  <button id="ownerBtn" style="display:none" onclick="openSec('admin')">👑 الإدارة</button>
-  <button onclick="logout()">🚪 خروج</button>
+<div id="app" class="box">
+  <h2>تم الدخول ✅</h2>
+  <p id="info"></p>
+  <button onclick="logout()">خروج</button>
 </div>
-
-<div class="content">
-
-<div id="hotel" class="section active">
-  <h2>🏨 غرف الفندق (12 غرفة)</h2>
-  <div id="rooms"></div>
-</div>
-
-<div id="cafe" class="section">
-  <h2>☕ الكافيه</h2>
-  <div id="menu"></div>
-</div>
-
-<div id="orders" class="section">
-  <h2>🧾 الطلبات</h2>
-  <div id="orderList"></div>
-</div>
-
-<div id="admin" class="section">
-  <h2>👑 إضافة مشروب</h2>
-  <input id="drinkName" placeholder="اسم المشروب">
-  <button onclick="addDrink()">إضافة</button>
-</div>
-
-</div>
-</div>
-</div>
-
-<div class="footer">© Queen Hotel – Eyad أبو جاد</div>
 
 <script>
-/* 🔐 الأكواد السرية */
 const OWNER_CODE = "QUEEN-OWNER";
 const STAFF_CODE = "QUEEN-STAFF";
 
-let menu = JSON.parse(localStorage.menu||'["شاي","قهوة","بيبسي","مياه"]');
-let orders = JSON.parse(localStorage.orders||"[]");
-
-/* LOGIN */
 function login(){
-  let u = username.value.trim();
-  let s = secret.value.trim();
+  let u = document.getElementById("username").value.trim();
+  let s = document.getElementById("secret").value.trim();
 
   if(!u){
     alert("اكتب اسمك");
@@ -165,95 +74,29 @@ function login(){
   if(s === OWNER_CODE) role = "owner";
   else if(s === STAFF_CODE) role = "staff";
 
-  localStorage.user = u;
-  localStorage.role = role;
-  start();
+  localStorage.setItem("user", u);
+  localStorage.setItem("role", role);
+
+  show();
 }
 
-/* START */
-function start(){
-  login.style.display="none";
-  app.style.display="block";
-
-  if(localStorage.role==="staff") staffBtn.style.display="block";
-  if(localStorage.role==="owner"){
-    staffBtn.style.display="block";
-    ownerBtn.style.display="block";
-  }
-
-  renderRooms();
-  renderMenu();
-  renderOrders();
+function show(){
+  document.getElementById("login").style.display="none";
+  document.getElementById("app").style.display="block";
+  document.getElementById("info").innerText =
+    "أهلاً " + localStorage.getItem("user") +
+    " | الدور: " + localStorage.getItem("role");
 }
 
-/* ROOMS */
-function renderRooms(){
-  rooms.innerHTML="";
-  for(let i=1;i<=12;i++){
-    rooms.innerHTML+=`<div class="item">غرفة رقم ${i}</div>`;
-  }
-}
-
-/* MENU */
-function renderMenu(){
-  menuDiv = document.getElementById("menu");
-  menuDiv.innerHTML="";
-  menu.forEach(d=>{
-    menuDiv.innerHTML+=`
-      <div class="item">
-        <span>${d}</span>
-        <button onclick="order('${d}')">طلب</button>
-      </div>`;
-  });
-}
-
-/* ORDER */
-function order(item){
-  let room = prompt("اختر رقم الغرفة (1 إلى 12)");
-  if(!room || isNaN(room) || room<1 || room>12){
-    alert("رقم الغرفة غير صحيح");
-    return;
-  }
-  orders.push({user:localStorage.user,room,item});
-  localStorage.orders=JSON.stringify(orders);
-  alert("تم إرسال الطلب");
-}
-
-/* ORDERS */
-function renderOrders(){
-  orderList.innerHTML="";
-  orders.forEach(o=>{
-    orderList.innerHTML+=`
-      <div class="item">
-        ${o.user} | غرفة ${o.room} | ${o.item}
-      </div>`;
-  });
-}
-
-/* ADMIN */
-function addDrink(){
-  let d = drinkName.value.trim();
-  if(!d) return;
-  menu.push(d);
-  localStorage.menu=JSON.stringify(menu);
-  drinkName.value="";
-  renderMenu();
-}
-
-/* NAV */
-function openSec(id){
-  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-}
-
-/* LOGOUT */
 function logout(){
   localStorage.clear();
   location.reload();
 }
 
-window.onload=()=>{
-  if(localStorage.user) start();
+window.onload = function(){
+  if(localStorage.getItem("user")){
+    show();
+  }
 };
 </script>
 
