@@ -6,13 +6,13 @@
 <title>Queen Hotel</title>
 
 <style>
-*{box-sizing:border-box;font-family:Tahoma}
+*{box-sizing:border-box;font-family:Tahomа}
 body{
   margin:0;
   min-height:100vh;
-  background:linear-gradient(135deg,#020024,#090979,#ff0000);
-  background-size:400% 400%;
-  animation:bg 15s infinite;
+  background:linear-gradient(135deg,#050b2e,#000,#0a1cff);
+  background-size:300% 300%;
+  animation:bg 12s infinite;
   color:#fff;
 }
 @keyframes bg{
@@ -20,236 +20,215 @@ body{
   50%{background-position:100% 50%}
   100%{background-position:0% 50%}
 }
-.wrap{max-width:450px;margin:auto;padding:15px}
-.box{
-  background:rgba(0,0,0,.65);
-  padding:20px;
-  border-radius:18px;
+.wrap{max-width:480px;margin:auto;padding:15px}
+
+h2{text-align:center;margin:10px 0}
+
+.card{
+  background:rgba(10,10,30,.85);
+  border-radius:16px;
+  padding:14px;
+  margin:10px 0;
+  box-shadow:0 0 25px #000;
+  transition:.3s;
 }
-h1{
-  text-align:center;
-  color:red;
-  animation:glow 2s infinite alternate;
-}
-@keyframes glow{
-  from{text-shadow:0 0 5px red}
-  to{text-shadow:0 0 20px red}
-}
-input,select,button{
-  width:100%;
-  padding:12px;
-  margin:6px 0;
-  border:none;
-  border-radius:10px;
-}
-button{
-  background:#0a66ff;
-  color:#fff;
-  font-weight:bold;
+.card:hover{transform:scale(1.02)}
+
+.room{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
   cursor:pointer;
 }
-.nav{display:flex;gap:5px;margin-bottom:10px}
-.nav button{flex:1;font-size:12px}
-.section{display:none}
-.section.active{display:block}
-.card{
-  background:#0a0f2a;
-  padding:12px;
-  border-radius:12px;
-  margin:8px 0;
-}
 .status{
-  padding:4px 8px;
-  border-radius:8px;
+  padding:4px 10px;
+  border-radius:20px;
   font-size:12px;
 }
-.free{background:green}
-.booked{background:orange}
-.busy{background:red}
-.staff-card{
-  display:flex;
-  gap:10px;
-  align-items:center;
+.free{background:#00c853}
+.booked{background:#ffab00}
+.busy{background:#d50000}
+
+button{
+  background:linear-gradient(135deg,#1e90ff,#003cff);
+  border:none;
+  color:#fff;
+  padding:10px;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:bold;
 }
-.staff-card img{
-  width:60px;
-  height:60px;
-  border-radius:50%;
+button:hover{opacity:.85}
+
+.modal{
+  position:fixed;
+  bottom:0;left:0;right:0;
+  background:#020015;
+  border-radius:20px 20px 0 0;
+  padding:18px;
+  display:none;
+  box-shadow:0 -10px 30px #000;
 }
-.small{font-size:12px;opacity:.8}
-img,video{max-width:100%;border-radius:12px}
+.modal input,textarea,select{
+  width:100%;
+  margin:5px 0;
+  padding:10px;
+  border-radius:10px;
+  border:none;
+}
+.close{background:#d50000}
+
+.item{
+  background:#0a0f2a;
+  padding:10px;
+  border-radius:12px;
+  margin:6px 0;
+}
+.small{font-size:12px;opacity:.75}
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
-<div id="loginBox">
-  <div class="wrap">
-    <div class="box">
-      <h1>QUEEN</h1>
-      <input id="nameInput" placeholder="اسمك">
-      <select id="roleSelect">
-        <option value="client">عميل</option>
-        <option value="hotel">موظف فندق</option>
-        <option value="owner">أونر</option>
-      </select>
-      <input id="codeInput" placeholder="كود (للموظفين)">
-      <button onclick="login()">دخول</button>
-    </div>
-  </div>
+<audio id="clickSound" src="https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3"></audio>
+<audio id="successSound" src="https://assets.mixkit.co/sfx/preview/mixkit-confirmation-tone-2867.mp3"></audio>
+
+<div class="wrap">
+
+<h2>🏨 حالة الغرف</h2>
+<div id="rooms"></div>
+
+<h2>☕ الكافيه</h2>
+<div class="card">
+  <b>🥘 أكل</b>
+  <div id="food"></div>
+  <b>🥤 مشروبات</b>
+  <div id="drinks"></div>
 </div>
 
-<!-- APP -->
-<div id="app" style="display:none">
-  <div class="wrap">
+<h2>📜 السجل (الأخير)</h2>
+<div id="log"></div>
 
-    <div class="nav">
-      <button onclick="show('rooms')">🏨</button>
-      <button onclick="show('events')">🎉</button>
-      <button onclick="show('staff')">👔</button>
-      <button onclick="show('orders')">📩</button>
-      <button onclick="logout()">🚪</button>
-    </div>
+</div>
 
-    <!-- ROOMS -->
-    <div id="rooms" class="section active">
-      <h3>حالة الغرف</h3>
-      <div id="roomsList"></div>
-    </div>
-
-    <!-- EVENTS -->
-    <div id="events" class="section">
-      <h3>الحفلات</h3>
-      <div class="card">
-        <img src="https://i.imgur.com/DE0F3961.jpg">
-        <p class="small">حفلات Queen Plaza – العين السخنة</p>
-      </div>
-    </div>
-
-    <!-- STAFF -->
-    <div id="staff" class="section">
-      <h3>كارت الموظف</h3>
-      <div class="card staff-card">
-        <img src="https://i.imgur.com/1Xq9BiP.png">
-        <div>
-          <b id="staffName"></b>
-          <div class="small" id="staffRole"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ORDERS -->
-    <div id="orders" class="section">
-      <h3>طلبات الغرف</h3>
-      <div id="ordersList"></div>
-    </div>
-
-  </div>
+<!-- MODAL -->
+<div id="roomModal" class="modal">
+  <h3 id="roomTitle"></h3>
+  <input id="custName" placeholder="اسم العميل">
+  <input id="people" type="number" placeholder="عدد الأفراد">
+  <input id="nights" type="number" placeholder="عدد الليالي">
+  <textarea id="notes" placeholder="ملاحظات"></textarea>
+  <select id="roomStatus">
+    <option value="booked">محجوزة</option>
+    <option value="busy">مؤجرة</option>
+    <option value="free">فاضية</option>
+  </select>
+  <button onclick="confirmRoom()">تأكيد</button>
+  <button class="close" onclick="closeModal()">إغلاق</button>
 </div>
 
 <script>
-const OWNER_CODE="OWNER-QUEEN";
-const HOTEL_CODE="HOTEL-QUEEN";
+const clickSound=document.getElementById("clickSound");
+const successSound=document.getElementById("successSound");
 
-const loginBox=document.getElementById("loginBox");
-const app=document.getElementById("app");
+function soundClick(){clickSound.play()}
+function soundSuccess(){successSound.play()}
 
-function login(){
-  const name=nameInput.value.trim();
-  const role=roleSelect.value;
-  const code=codeInput.value;
-
-  if(!name) return alert("اكتب اسمك");
-
-  if(role==="owner" && code!==OWNER_CODE) return alert("كود أونر غلط");
-  if(role==="hotel" && code!==HOTEL_CODE) return alert("كود الفندق غلط");
-
-  localStorage.user=name;
-  localStorage.role=role;
-  start();
+// إنشاء داتا لو مش موجودة (من غير مسح)
+if(!localStorage.rooms){
+  localStorage.rooms=JSON.stringify(
+    Array.from({length:4},(_,i)=>({id:i+1,status:"free"}))
+  );
 }
+if(!localStorage.log)localStorage.log="[]";
 
-function start(){
-  loginBox.style.display="none";
-  app.style.display="block";
+const foodItems=["برجر","بيتزا","كشري","فراخ"];
+const drinkItems=["قهوة","شاي","مياه","بيبسي"];
 
-  staffName.innerText=localStorage.user;
-  staffRole.innerText=localStorage.role;
-
-  if(!localStorage.rooms){
-    const rooms=[];
-    for(let i=1;i<=4;i++){
-      rooms.push({num:i,status:"free"});
-    }
-    localStorage.rooms=JSON.stringify(rooms);
-  }
-
-  renderRooms();
-  renderOrders();
-}
-
-function show(id){
-  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-}
+let currentRoom=null;
 
 function renderRooms(){
-  const rooms=JSON.parse(localStorage.rooms);
-  roomsList.innerHTML="";
-  rooms.forEach(r=>{
-    roomsList.innerHTML+=`
-      <div class="card">
-        غرفة ${r.num}
+  const data=JSON.parse(localStorage.rooms);
+  rooms.innerHTML="";
+  data.forEach(r=>{
+    rooms.innerHTML+=`
+      <div class="card room" onclick="openRoom(${r.id})">
+        <span>غرفة ${r.id}</span>
         <span class="status ${r.status}">
           ${r.status==="free"?"فاضية":r.status==="booked"?"محجوزة":"مؤجرة"}
         </span>
-        ${localStorage.role!=="client" ? `
-        <select onchange="changeStatus(${r.num},this.value)">
-          <option value="free">فاضية</option>
-          <option value="booked">محجوزة</option>
-          <option value="busy">مؤجرة</option>
-        </select>`:""}
       </div>`;
   });
 }
 
-function changeStatus(num,status){
-  const rooms=JSON.parse(localStorage.rooms);
-  const room=rooms.find(r=>r.num===num);
-  room.status=status;
-  localStorage.rooms=JSON.stringify(rooms);
+function openRoom(id){
+  soundClick();
+  currentRoom=id;
+  roomTitle.innerText="غرفة "+id;
+  roomModal.style.display="block";
+}
 
-  const orders=JSON.parse(localStorage.orders||"[]");
-  orders.push({
-    room:num,
-    status,
-    by:localStorage.user,
-    time:new Date().toLocaleTimeString()
+function closeModal(){
+  roomModal.style.display="none";
+}
+
+function confirmRoom(){
+  soundSuccess();
+  const data=JSON.parse(localStorage.rooms);
+  const room=data.find(r=>r.id===currentRoom);
+  room.status=roomStatus.value;
+  localStorage.rooms=JSON.stringify(data);
+
+  const logs=JSON.parse(localStorage.log);
+  logs.unshift(`غرفة ${currentRoom} ➜ ${roomStatus.value} | ${custName.value||"بدون اسم"}`);
+  localStorage.log=JSON.stringify(logs);
+
+  closeModal();
+}
+
+function renderCafe(){
+  food.innerHTML="";
+  foodItems.forEach(i=>{
+    food.innerHTML+=`
+      <div class="item">
+        ${i}
+        <button onclick="addLog('طلب أكل: ${i}')">طلب</button>
+      </div>`;
   });
-  localStorage.orders=JSON.stringify(orders);
 
+  drinks.innerHTML="";
+  drinkItems.forEach(i=>{
+    drinks.innerHTML+=`
+      <div class="item">
+        ${i}
+        <button onclick="addLog('طلب مشروب: ${i}')">طلب</button>
+      </div>`;
+  });
+}
+
+function addLog(text){
+  soundSuccess();
+  const logs=JSON.parse(localStorage.log);
+  logs.unshift(text);
+  localStorage.log=JSON.stringify(logs);
+}
+
+function renderLog(){
+  log.innerHTML="";
+  JSON.parse(localStorage.log).forEach(l=>{
+    log.innerHTML+=`<div class="item small">${l}</div>`;
+  });
+}
+
+// تحديث تلقائي كل 1 ثانية (زي ما طلبت)
+setInterval(()=>{
   renderRooms();
-  renderOrders();
-}
+  renderLog();
+},1000);
 
-function renderOrders(){
-  const orders=JSON.parse(localStorage.orders||"[]");
-  ordersList.innerHTML="";
-  orders.reverse().forEach(o=>{
-    ordersList.innerHTML+=`
-      <div class="card small">
-        غرفة ${o.room} | ${o.status} | بواسطة ${o.by} | ${o.time}
-      </div>`;
-  });
-}
-
-function logout(){
-  localStorage.clear();
-  location.reload();
-}
-
-if(localStorage.user) start();
+renderCafe();
+renderRooms();
+renderLog();
 </script>
 
 </body>
