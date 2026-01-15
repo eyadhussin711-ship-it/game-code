@@ -2,10 +2,13 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>Login System</title>
+<title>Login</title>
 
 <style>
-*{box-sizing:border-box;font-family:Arial}
+*{
+  box-sizing:border-box;
+  font-family:Arial;
+}
 body{
   margin:0;
   height:100vh;
@@ -13,14 +16,14 @@ body{
   justify-content:center;
   align-items:center;
   background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-  color:#fff;
 }
 .login-box{
-  background:rgba(255,255,255,.08);
-  padding:30px;
-  border-radius:16px;
   width:320px;
+  background:rgba(255,255,255,0.1);
+  padding:25px;
+  border-radius:15px;
   text-align:center;
+  color:#fff;
 }
 .login-box h2{
   margin-bottom:20px;
@@ -28,13 +31,14 @@ body{
 .login-box input{
   width:100%;
   padding:12px;
-  margin:10px 0;
+  margin:8px 0;
   border:none;
   border-radius:10px;
 }
 .login-box button{
   width:100%;
   padding:12px;
+  margin-top:10px;
   border:none;
   border-radius:20px;
   background:#00f5ff;
@@ -42,56 +46,54 @@ body{
   font-weight:bold;
   cursor:pointer;
 }
-.hidden{display:none}
-.role{
+.result{
   margin-top:15px;
   font-weight:bold;
 }
-.owner{color:#ffd166}
-.player{color:#06d6a0}
+.owner{
+  color:#ffd166;
+}
+.player{
+  color:#06d6a0;
+}
 </style>
 </head>
 
 <body>
 
-<div class="login-box" id="login">
+<div class="login-box">
   <h2>تسجيل الدخول</h2>
-  <input id="name" placeholder="الإيميل أو الاسم">
+
+  <input id="username" placeholder="الإيميل أو الاسم">
   <input id="code" placeholder="كود الدخول">
+
   <button onclick="login()">دخول</button>
-  <div class="role" id="roleText"></div>
+
+  <div class="result" id="result"></div>
 </div>
 
 <script>
 const OWNER_CODE = "OWNER-999";
 
 function login(){
-  const name = document.getElementById("name").value.trim();
-  const code = document.getElementById("code").value.trim();
+  let user = document.getElementById("username").value.trim();
+  let code = document.getElementById("code").value.trim();
+  let result = document.getElementById("result");
 
-  if(!name || !code){
-    alert("كمّل البيانات");
+  if(user === "" || code === ""){
+    alert("اكتب الاسم والكود");
     return;
   }
 
-  let role = "player";
   if(code === OWNER_CODE){
-    role = "owner";
-  }
-
-  localStorage.setItem("userName", name);
-  localStorage.setItem("userRole", role);
-
-  showRole(role);
-}
-
-function showRole(role){
-  const text = document.getElementById("roleText");
-  if(role === "owner"){
-    text.innerHTML = "✅ تم تسجيلك كـ <span class='owner'>OWNER</span>";
+    result.innerHTML = "✅ تم تسجيلك كـ <span class='owner'>OWNER</span>";
+    localStorage.setItem("role","owner");
   }else{
-    text.innerHTML = "✅ تم تسجيلك كلاعب <span class='player'>PLAYER</span>";
+    result.innerHTML = "✅ تم تسجيلك كـ <span class='player'>PLAYER</span>";
+    localStorage.setItem("role","player");
   }
+
+  localStorage.setItem("user",user);
 }
 </script>
 
