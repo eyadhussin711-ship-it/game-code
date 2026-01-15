@@ -3,187 +3,262 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Queen Hotel</title>
+<title>Queen Hotel System</title>
 
 <style>
-*{box-sizing:border-box;font-family:Tahom,a}
+*{box-sizing:border-box;font-family:Tahoma}
 body{
   margin:0;
-  min-height:100vh;
-  background:linear-gradient(120deg,#0a1cff,#000,#a00000);
-  background-size:300% 300%;
-  animation:bg 10s infinite alternate;
+  background:linear-gradient(135deg,#0a0f2a,#1a0066,#000);
   color:#fff;
-}
-@keyframes bg{
-  0%{background-position:left}
-  100%{background-position:right}
+  min-height:100vh;
 }
 
-.layout{
-  display:flex;
+/* ===== LOGIN ===== */
+#login{
   height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
-
-.sidebar{
-  width:150px;
-  padding:10px;
-  background:rgba(0,0,0,.4);
+.login-box{
+  background:rgba(0,0,0,.6);
+  padding:30px;
+  border-radius:20px;
+  width:320px;
+  box-shadow:0 0 40px #000;
+  animation:pop .6s;
 }
-
-.room{
-  padding:12px;
-  margin-bottom:10px;
-  border-radius:12px;
-  cursor:pointer;
-  position:relative;
+@keyframes pop{from{transform:scale(.8)}to{transform:scale(1)}}
+.login-box h1{
   text-align:center;
-  font-weight:bold;
+  color:#ff004c;
+  text-shadow:0 0 20px red;
 }
-
-.room.free{background:#0f7b3e}
-.room.booked{background:#c78a00}
-.room.busy{background:#8b0000}
-
-.room:hover{transform:scale(1.05)}
-
-.tooltip{
-  position:absolute;
-  right:110%;
-  top:50%;
-  transform:translateY(-50%);
-  background:#000;
-  padding:10px;
-  border-radius:10px;
-  width:180px;
-  display:none;
-  font-size:12px;
-}
-.room:hover .tooltip{display:block}
-
-.content{
-  flex:1;
-  padding:20px;
-}
-
-.box{
-  background:rgba(0,0,40,.7);
-  padding:20px;
-  border-radius:18px;
-  max-width:400px;
-}
-
-input,select,button{
+input,select,button,textarea{
   width:100%;
-  padding:10px;
-  margin:6px 0;
+  padding:12px;
+  margin:8px 0;
+  border-radius:12px;
   border:none;
-  border-radius:10px;
 }
-
 button{
   background:#0a66ff;
   color:#fff;
-  cursor:pointer;
   font-weight:bold;
+  cursor:pointer;
 }
-.small{font-size:12px;opacity:.8}
+button:hover{opacity:.9}
+
+/* ===== APP ===== */
+#app{display:none}
+.top{
+  display:flex;
+  gap:6px;
+  padding:10px;
+  background:#060a22;
+}
+.top button{flex:1}
+
+.main{
+  display:flex;
+  height:calc(100vh - 60px);
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:180px;
+  background:#0b0f2a;
+  padding:10px;
+}
+.room{
+  background:#10184a;
+  padding:12px;
+  border-radius:12px;
+  margin:6px 0;
+  cursor:pointer;
+  display:flex;
+  justify-content:space-between;
+}
+.free{border-right:5px solid #00ff99}
+.busy{border-right:5px solid red}
+
+/* CONTENT */
+.content{
+  flex:1;
+  padding:15px;
+}
+.box{
+  background:rgba(0,0,0,.4);
+  padding:20px;
+  border-radius:18px;
+}
+.item{
+  background:#10184a;
+  padding:12px;
+  border-radius:12px;
+  margin:6px 0;
+}
+
+/* HIDE */
+.section{display:none}
+.section.active{display:block}
 </style>
 </head>
 
 <body>
 
-<div class="layout">
+<!-- LOGIN -->
+<div id="login">
+  <div class="login-box">
+    <h1>QUEEN</h1>
+    <input id="lname" placeholder="اسمك">
+    <select id="lrole">
+      <option value="client">عميل</option>
+      <option value="hotel">موظف فندق</option>
+      <option value="cafe">موظف كافيه</option>
+      <option value="owner">أونر</option>
+    </select>
+    <input id="lcode" placeholder="كود (للموظفين)">
+    <button onclick="login()">دخول</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+<div class="top">
+  <button onclick="show('rooms')">🏨 غرف</button>
+  <button onclick="show('cafe')">☕ كافيه</button>
+  <button onclick="show('orders')">📩 طلبات</button>
+  <button onclick="show('news')">📰 أخبار</button>
+  <button onclick="show('events')">🎉 حفلات</button>
+  <button onclick="logout()">🚪</button>
+</div>
+
+<div class="main">
 
   <!-- ROOMS -->
   <div class="sidebar" id="rooms"></div>
 
-  <!-- FORM -->
   <div class="content">
-    <h2>📋 تفاصيل الغرفة</h2>
-    <div class="box" id="formBox">
-      <p class="small">اختار غرفة من الشمال</p>
-    </div>
-  </div>
 
+    <div id="roomForm" class="section active">
+      <div class="box">اختار غرفة من الشمال</div>
+    </div>
+
+    <div id="cafe" class="section">
+      <div class="box">
+        <h3>الكافيه</h3>
+        <button onclick="orderCafe('قهوة')">☕ قهوة</button>
+        <button onclick="orderCafe('شاي')">🍵 شاي</button>
+        <button onclick="orderCafe('برجر')">🍔 برجر</button>
+        <button onclick="orderCafe('بيتزا')">🍕 بيتزا</button>
+      </div>
+    </div>
+
+    <div id="orders" class="section">
+      <div class="box" id="ordersList"></div>
+    </div>
+
+    <div id="news" class="section">
+      <div class="box">
+        <textarea id="newsText" placeholder="خبر جديد"></textarea>
+        <button onclick="addNews()">نشر</button>
+        <div id="newsList"></div>
+      </div>
+    </div>
+
+    <div id="events" class="section">
+      <div class="box">
+        <img src="https://i.imgur.com/DE0F3961.jpg" style="width:100%;border-radius:12px">
+        <p>حفلات Queen Plaza – العين السخنة</p>
+      </div>
+    </div>
+
+  </div>
+</div>
 </div>
 
 <script>
-/* ===== DATA INIT ===== */
-if(!localStorage.rooms){
-  localStorage.rooms=JSON.stringify([
-    {id:1,status:"free",info:{}},
-    {id:2,status:"free",info:{}},
-    {id:3,status:"free",info:{}},
-    {id:4,status:"free",info:{}}
-  ]);
+const CODES={hotel:"HOTEL-1",cafe:"CAFE-1",owner:"OWNER-1"};
+
+function login(){
+  if(lrole.value!=="client" && lcode.value!==CODES[lrole.value])
+    return alert("كود غلط");
+  localStorage.user=lname.value;
+  localStorage.role=lrole.value;
+  start();
 }
 
-/* ===== RENDER ROOMS ===== */
+function start(){
+  login.style.display="none";
+  app.style.display="block";
+  initRooms();
+  renderRooms();
+  show('roomForm');
+}
+
+function logout(){localStorage.clear();location.reload()}
+
+function show(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function initRooms(){
+  if(!localStorage.rooms)
+    localStorage.rooms=JSON.stringify([
+      {id:1,status:"free"},
+      {id:2,status:"free"},
+      {id:3,status:"free"},
+      {id:4,status:"free"},
+    ]);
+}
+
 function renderRooms(){
-  const data=JSON.parse(localStorage.rooms);
   rooms.innerHTML="";
-  data.forEach(r=>{
+  JSON.parse(localStorage.rooms).forEach(r=>{
     rooms.innerHTML+=`
       <div class="room ${r.status}" onclick="openRoom(${r.id})">
         غرفة ${r.id}
-        <div class="tooltip">
-          الحالة: ${
-            r.status==="free"?"فاضية":
-            r.status==="booked"?"محجوزة":"مؤجرة"
-          }<br>
-          👤 ${r.info.name||"—"}<br>
-          👥 ${r.info.people||"—"}
-        </div>
-      </div>
-    `;
+        <span>${r.status==="free"?"🟢":"🔴"}</span>
+      </div>`;
   });
 }
 
-/* ===== OPEN ROOM ===== */
 function openRoom(id){
-  const roomsData=JSON.parse(localStorage.rooms);
-  const room=roomsData.find(r=>r.id===id);
-
-  formBox.innerHTML=`
-    <h3>غرفة ${room.id}</h3>
-
-    <label>اسم العميل</label>
-    <input id="name" value="${room.info.name||""}">
-
-    <label>عدد الأشخاص</label>
-    <input id="people" type="number" value="${room.info.people||""}">
-
-    <label>الحالة</label>
-    <select id="status">
-      <option value="free" ${room.status==="free"?"selected":""}>فاضية</option>
-      <option value="booked" ${room.status==="booked"?"selected":""}>محجوزة</option>
-      <option value="busy" ${room.status==="busy"?"selected":""}>مؤجرة</option>
-    </select>
-
-    <button onclick="saveRoom(${room.id})">💾 حفظ</button>
-  `;
+  show('roomForm');
+  roomForm.innerHTML=`
+    <div class="box">
+      <h3>غرفة ${id}</h3>
+      <input id="cname" placeholder="اسم العميل">
+      <input id="persons" placeholder="عدد الأشخاص">
+      <input id="days" placeholder="عدد الأيام">
+      <textarea id="note" placeholder="ملاحظات"></textarea>
+      <button onclick="reserve(${id})">إرسال</button>
+    </div>`;
 }
 
-/* ===== SAVE ===== */
-function saveRoom(id){
-  const data=JSON.parse(localStorage.rooms);
-  const r=data.find(x=>x.id===id);
-
-  r.status=status.value;
-  r.info={
-    name:name.value,
-    people:people.value
-  };
-
-  localStorage.rooms=JSON.stringify(data);
+function reserve(id){
+  let rooms=JSON.parse(localStorage.rooms);
+  rooms.find(r=>r.id===id).status="busy";
+  localStorage.rooms=JSON.stringify(rooms);
+  alert("تم الحجز");
   renderRooms();
-  alert("تم الحفظ ✔");
 }
 
-/* ===== AUTO UPDATE ===== */
-renderRooms();
-setInterval(renderRooms,1000);
+function orderCafe(item){
+  alert("تم طلب "+item);
+}
+
+function addNews(){
+  if(localStorage.role!=="owner")return;
+  let n=JSON.parse(localStorage.news||"[]");
+  n.push(newsText.value);
+  localStorage.news=JSON.stringify(n);
+  newsText.value="";
+}
 </script>
 
 </body>
