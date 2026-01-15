@@ -8,59 +8,76 @@
 <style>
 *{box-sizing:border-box;font-family:Tahoma}
 body{
-  margin:0;min-height:100vh;color:#fff;
-  background:linear-gradient(270deg,#000,#001f4d,#000);
+  margin:0;
+  min-height:100vh;
+  background:linear-gradient(135deg,#020024,#090979,#ff0000);
   background-size:400% 400%;
   animation:bg 15s infinite;
+  color:#fff;
 }
 @keyframes bg{
   0%{background-position:0% 50%}
   50%{background-position:100% 50%}
   100%{background-position:0% 50%}
 }
-.wrap{max-width:420px;margin:auto;padding:15px}
+.wrap{max-width:450px;margin:auto;padding:15px}
 .box{
-  background:rgba(0,0,30,.8);
-  padding:20px;border-radius:18px;
-  box-shadow:0 0 30px #000;
+  background:rgba(0,0,0,.65);
+  padding:20px;
+  border-radius:18px;
 }
 h1{
   text-align:center;
   color:red;
-  animation:glow 1.5s infinite alternate;
+  animation:glow 2s infinite alternate;
 }
 @keyframes glow{
   from{text-shadow:0 0 5px red}
   to{text-shadow:0 0 20px red}
 }
-input,button,select{
-  width:100%;padding:12px;margin:6px 0;
-  border:none;border-radius:12px;
+input,select,button{
+  width:100%;
+  padding:12px;
+  margin:6px 0;
+  border:none;
+  border-radius:10px;
 }
-button{background:#0a66ff;color:#fff;font-weight:bold}
+button{
+  background:#0a66ff;
+  color:#fff;
+  font-weight:bold;
+  cursor:pointer;
+}
 .nav{display:flex;gap:5px;margin-bottom:10px}
-.nav button{flex:1;font-size:13px}
+.nav button{flex:1;font-size:12px}
 .section{display:none}
 .section.active{display:block}
-.item{
-  background:#0a1a3a;
-  padding:12px;border-radius:14px;
+.card{
+  background:#0a0f2a;
+  padding:12px;
+  border-radius:12px;
   margin:8px 0;
 }
-.room.free{border-left:6px solid #00ff88}
-.room.booked{border-left:6px solid #ff3333}
-
-.order-card{
-  background:#0f2b6b;
-  border-radius:14px;
-  padding:12px;
-  margin:10px 0;
+.status{
+  padding:4px 8px;
+  border-radius:8px;
+  font-size:12px;
 }
-.order-actions{display:flex;gap:6px;margin-top:8px}
-.order-actions button{flex:1;padding:8px}
-.btn-ok{background:#00c853}
-.btn-cancel{background:#ff1744}
+.free{background:green}
+.booked{background:orange}
+.busy{background:red}
+.staff-card{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+.staff-card img{
+  width:60px;
+  height:60px;
+  border-radius:50%;
+}
 .small{font-size:12px;opacity:.8}
+img,video{max-width:100%;border-radius:12px}
 </style>
 </head>
 
@@ -75,7 +92,6 @@ button{background:#0a66ff;color:#fff;font-weight:bold}
       <select id="roleSelect">
         <option value="client">عميل</option>
         <option value="hotel">موظف فندق</option>
-        <option value="cafe">موظف كافيه</option>
         <option value="owner">أونر</option>
       </select>
       <input id="codeInput" placeholder="كود (للموظفين)">
@@ -90,124 +106,150 @@ button{background:#0a66ff;color:#fff;font-weight:bold}
 
     <div class="nav">
       <button onclick="show('rooms')">🏨</button>
+      <button onclick="show('events')">🎉</button>
+      <button onclick="show('staff')">👔</button>
       <button onclick="show('orders')">📩</button>
       <button onclick="logout()">🚪</button>
     </div>
 
     <!-- ROOMS -->
     <div id="rooms" class="section active">
-      <h3>الغرف</h3>
+      <h3>حالة الغرف</h3>
       <div id="roomsList"></div>
+    </div>
+
+    <!-- EVENTS -->
+    <div id="events" class="section">
+      <h3>الحفلات</h3>
+      <div class="card">
+        <img src="https://i.imgur.com/DE0F3961.jpg">
+        <p class="small">حفلات Queen Plaza – العين السخنة</p>
+      </div>
+    </div>
+
+    <!-- STAFF -->
+    <div id="staff" class="section">
+      <h3>كارت الموظف</h3>
+      <div class="card staff-card">
+        <img src="https://i.imgur.com/1Xq9BiP.png">
+        <div>
+          <b id="staffName"></b>
+          <div class="small" id="staffRole"></div>
+        </div>
+      </div>
     </div>
 
     <!-- ORDERS -->
     <div id="orders" class="section">
-      <h3>طلبات الموظفين</h3>
+      <h3>طلبات الغرف</h3>
       <div id="ordersList"></div>
     </div>
 
   </div>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc } 
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+<script>
+const OWNER_CODE="OWNER-QUEEN";
+const HOTEL_CODE="HOTEL-QUEEN";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBA2YeC6Mo8CZi7Ms5Gckhm4SWPmLgFNcE",
-  authDomain: "queenhotel-5703c.firebaseapp.com",
-  projectId: "queenhotel-5703c",
-};
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const loginBox=document.getElementById("loginBox");
+const app=document.getElementById("app");
 
-const OWNER="OWNER-QUEEN", HOTEL="HOTEL-QUEEN", CAFE="CAFE-QUEEN";
+function login(){
+  const name=nameInput.value.trim();
+  const role=roleSelect.value;
+  const code=codeInput.value;
 
-window.login=function(){
-  const n=nameInput.value.trim();
-  const r=roleSelect.value;
-  const c=codeInput.value;
-  if(!n)return alert("اكتب اسمك");
-  if(r==="owner"&&c!==OWNER)return alert("كود غلط");
-  if(r==="hotel"&&c!==HOTEL)return alert("كود غلط");
-  if(r==="cafe"&&c!==CAFE)return alert("كود غلط");
-  localStorage.user=n;
-  localStorage.role=r;
+  if(!name) return alert("اكتب اسمك");
+
+  if(role==="owner" && code!==OWNER_CODE) return alert("كود أونر غلط");
+  if(role==="hotel" && code!==HOTEL_CODE) return alert("كود الفندق غلط");
+
+  localStorage.user=name;
+  localStorage.role=role;
   start();
 }
 
 function start(){
   loginBox.style.display="none";
   app.style.display="block";
-  loadRooms();
-  loadOrders();
+
+  staffName.innerText=localStorage.user;
+  staffRole.innerText=localStorage.role;
+
+  if(!localStorage.rooms){
+    const rooms=[];
+    for(let i=1;i<=4;i++){
+      rooms.push({num:i,status:"free"});
+    }
+    localStorage.rooms=JSON.stringify(rooms);
+  }
+
+  renderRooms();
+  renderOrders();
 }
 
-window.show=id=>{
+function show(id){
   document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
 
-function loadRooms(){
+function renderRooms(){
+  const rooms=JSON.parse(localStorage.rooms);
   roomsList.innerHTML="";
-  for(let i=1;i<=4;i++){
+  rooms.forEach(r=>{
     roomsList.innerHTML+=`
-      <div class="item room free">
-        🏨 غرفة ${i}
-        <button onclick="bookRoom(${i})">حجز</button>
+      <div class="card">
+        غرفة ${r.num}
+        <span class="status ${r.status}">
+          ${r.status==="free"?"فاضية":r.status==="booked"?"محجوزة":"مؤجرة"}
+        </span>
+        ${localStorage.role!=="client" ? `
+        <select onchange="changeStatus(${r.num},this.value)">
+          <option value="free">فاضية</option>
+          <option value="booked">محجوزة</option>
+          <option value="busy">مؤجرة</option>
+        </select>`:""}
       </div>`;
-  }
-}
-
-window.bookRoom=async function(room){
-  if(localStorage.role!=="client")return;
-  const phone=prompt("رقم الهاتف");
-  const days=prompt("عدد الأيام");
-  if(!phone||!days)return;
-  await addDoc(collection(db,"orders"),{
-    room,client:localStorage.user,phone,days,
-    time:new Date().toLocaleTimeString(),
-    status:"pending"
-  });
-  alert("تم إرسال الطلب ✔");
-}
-
-function loadOrders(){
-  onSnapshot(collection(db,"orders"),snap=>{
-    ordersList.innerHTML="";
-    snap.forEach(d=>{
-      const o=d.data();
-      ordersList.innerHTML+=`
-        <div class="order-card">
-          <b>غرفة ${o.room}</b><br>
-          👤 ${o.client}<br>
-          📞 ${o.phone}<br>
-          ⏳ ${o.days} أيام
-          <div class="order-actions">
-            <button class="btn-ok" onclick="finish('${d.id}')">تم</button>
-            <button class="btn-cancel" onclick="cancel('${d.id}')">إلغاء</button>
-          </div>
-        </div>`;
-    });
   });
 }
 
-window.finish=async id=>{
-  await updateDoc(doc(db,"orders",id),{status:"done"});
-  alert("تم التأجير ✔");
-}
-window.cancel=async id=>{
-  await updateDoc(doc(db,"orders",id),{status:"cancel"});
-  alert("تم الإلغاء ❌");
+function changeStatus(num,status){
+  const rooms=JSON.parse(localStorage.rooms);
+  const room=rooms.find(r=>r.num===num);
+  room.status=status;
+  localStorage.rooms=JSON.stringify(rooms);
+
+  const orders=JSON.parse(localStorage.orders||"[]");
+  orders.push({
+    room:num,
+    status,
+    by:localStorage.user,
+    time:new Date().toLocaleTimeString()
+  });
+  localStorage.orders=JSON.stringify(orders);
+
+  renderRooms();
+  renderOrders();
 }
 
-window.logout=()=>{
+function renderOrders(){
+  const orders=JSON.parse(localStorage.orders||"[]");
+  ordersList.innerHTML="";
+  orders.reverse().forEach(o=>{
+    ordersList.innerHTML+=`
+      <div class="card small">
+        غرفة ${o.room} | ${o.status} | بواسطة ${o.by} | ${o.time}
+      </div>`;
+  });
+}
+
+function logout(){
   localStorage.clear();
   location.reload();
 }
 
-if(localStorage.user)start();
+if(localStorage.user) start();
 </script>
 
 </body>
